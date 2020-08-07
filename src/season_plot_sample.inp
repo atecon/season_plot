@@ -1,0 +1,40 @@
+clear
+set verbose off
+
+set workdir "/home/at/git/seasonality_plot/src"
+
+include string_utils.gfn
+include multiplot.gfn
+include season_plot.inp --force
+
+
+
+
+# Set parameter
+scalar run_example = 2
+
+if run_example == 1
+    open denmark.gdt -p -q  # querterly
+    series y = ldiff(LRM)
+
+elif run_example == 2
+    open AWM18.gdt -p -q  # querterly
+    series y = ldiff(HICP)
+
+
+elif run_example == 3
+    open djclose.gdt -q -p
+
+    series obsmajor = $obsmajor
+    series obsminor = $obsminor
+    series obsmicro = $obsmicro
+
+    smpl 1 120
+    series y = djclose      # 5 days business week
+
+    #print y obsmajor obsminor obsmicro -o
+    #stop
+endif
+
+
+season_plot(y, "season_plot.png")

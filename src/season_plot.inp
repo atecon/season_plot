@@ -1,0 +1,187 @@
+function void season_plot (const series y,
+                            string filename[null])
+    /*  */
+
+    errorif($datatype != 2, "Time-series data set needed.")
+    errorif($pd == 1, "Time-series has no seasonal frequency.")
+
+    smpl y --contiguous
+
+    # Initializations
+    string filename = (exists(filename)) ? filename : "display"
+    bundle self = null
+    string yname = argname(y)
+
+    flag_frequency_components(y, &self)
+
+    list self.frequency_series = get_frequency_series(&self)
+
+    group_y_by_frequencies(y, &self)
+
+    do_pivoting(&self)
+
+    multiplot(compile_subplots(self), filename)
+
+end function
+
+
+function void do_pivoting (bundle *self)
+    /* Wrapper for calling the actual pivoting steps. */
+
+    matrix self.mplot_obsmajor_by_obsminor = pivot_by_column_name(self.y_grouped_by_frequencies, "obsmajor", "obsminor", "f(x)")
+    matrix self.mplot_obsminor_by_obsmajor = pivot_by_column_name(self.y_grouped_by_frequencies, "obsminor", "obsmajor", "f(x)")
+
+    if self.frequency_components.obsmicro == TRUE
+        matrix self.mplot_obsmajor_by_obsmicro = pivot_by_column_name(self.y_grouped_by_frequencies, "obsmajor", "obsmicro", "f(x)")
+
+        matrix self.mplot_obsminor_by_obsmicro = pivot_by_column_name(self.y_grouped_by_frequencies, "obsminor", "obsmicro", "f(x)")
+
+        matrix self.mplot_obsmicro_by_obsmajor = pivot_by_column_name(self.y_grouped_by_frequencies, "obsmicro", "obsmajor", "f(x)")
+
+        matrix self.mplot_obsmicro_by_obsminor = pivot_by_column_name(self.y_grouped_by_frequencies, "obsmicro", "obsminor", "f(x)")
+    endif
+end function
+
+
+function strings compile_subplots (const bundle self)
+    /* Compile all combinations of plots and store gp-file names */
+
+    strings plot_files = defarray("seasplot1.gp", "seasplot2.gp")
+
+    seasplot(self.mplot_obsmajor_by_obsminor, "seasplot1.gp")
+    seasplot(self.mplot_obsminor_by_obsmajor, "seasplot2.gp")
+
+    if self.frequency_components.obsmicro == TRUE
+        seasplot(self.mplot_obsmajor_by_obsmicro, "seasplot3.gp")
+        seasplot(self.mplot_obsminor_by_obsmicro, "seasplot4.gp")
+        seasplot(self.mplot_obsmicro_by_obsmajor, "seasplot5.gp")
+        seasplot(self.mplot_obsmicro_by_obsminor, "seasplot6.gp")
+
+        plot_files = self.plot_files + defarray(\
+                                        "seasplot3.gp",\
+                                        "seasplot4.gp",\
+                                        "seasplot5.gp",\
+                                        "seasplot6.gp")
+    endif
+
+    return plot_files
+end function
+
+
+function void seasplot (const matrix x,
+                        const string filename)
+    /* Execute actual plotting. */
+
+    plot x
+        options with-lp fit=none
+        printf "set xlabel ''"
+    end plot --output="@filename"
+end function
+
+
+# TODO: put into separate small package
+# TODO: add another function pivot() where column indizes instead of names are passed
+function matrix pivot_by_column_name (const matrix m,
+                        const string index "Column to use for new index",
+                        const string split_column "Add columns using distinct values",
+                        const string values "Column to use for populating new matrix values")
+    /* Transform matrix from long to wide format; also known as pivoting. Inspired by Pandas' pivot() function:
+    https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pivot.html
+
+    TODO: Both 'column' and 'values' may be arrays.
+    */
+
+    scalar n_cols = cols(m)
+    errorif(n_cols < 3, "Matrix must comprise at least 3 columns.")
+
+    scalar pos_values = instrings(cnameget(m), values)
+    scalar pos_split_column = instrings(cnameget(m), split_column)
+    scalar pos_index_column = instrings(cnameget(m), index)
+
+    matrix split_values = values(m[, pos_split_column])
+    strings colnames = array(1 + rows(split_values))
+
+    # Drop split column from "m"
+    matrix split_vector = m[, pos_split_column]
+    matrix values_vector = m[, pos_values]
+    matrix index_vector = values(m[, pos_index_column]) # will be the x-axis in the following plot
+
+    matrix result = {}
+    loop i = 1..rows(split_values)
+        matrix mask = (split_vector .= split_values[i])
+        result ~= selifr(values_vector, mask)
+        colnames[i] = sprintf("v%d", split_values[i])
+    endloop
+
+    # eval m
+    # eval result
+    # eval index_vector
+    # stop
+
+    result ~= index_vector
+    colnames[1 + rows(split_values)] = cnameget(m, pos_index_column)
+    cnameset(result, colnames)
+
+    return result
+end function
+
+
+function void group_y_by_frequencies (const series y,
+                                      bundle *self)
+    /* Group y by all frequencies. */
+
+    matrix m = aggregate(y, self.frequency_series, mean)
+    matrix self.y_grouped_by_frequencies = drop_count_column(m)
+end function
+
+
+function matrix drop_count_column (matrix m)
+    /* Drop "count" column. */
+
+    cnames_old = cnameget(m)
+    scalar pos = instrings(cnames_old, "count")
+    cnames_new = strdrop(cnames_old, "count")
+
+    m = m[,-pos]
+    cnameset(m, cnames_new)
+
+    return m
+end function
+
+
+function list get_frequency_series (bundle *self)
+    /* Retrieve up to 3 frequency series. */
+
+    list L = null
+    strings keys = getkeys(self.frequency_components)
+
+    loop foreach i keys
+        if self.frequency_components["$i"] == TRUE
+            string vname = sprintf("$%s", "$i")
+            list L += genseries("$i", @vname)
+        endif
+    endloop
+
+    return L
+end function
+
+
+
+function void flag_frequency_components (const series y,
+                                        bundle *self)
+    /* Set flags for the 3 separate frequency components. */
+
+    bundle self.frequency_components = defbundle(\
+                                    "obsmajor", FALSE,\
+                                    "obsminor", FALSE,\
+                                    "obsmicro", FALSE)
+
+    if $pd > 1
+        self.frequency_components.obsmajor = TRUE
+        self.frequency_components.obsminor = TRUE
+    endif
+
+    if maxr($pd .= {5, 6, 7})  # TODO: really all??
+        self.frequency_components.obsmicro = TRUE
+    endif
+end function
