@@ -8,33 +8,35 @@ include multiplot.gfn
 include season_plot.inp --force
 
 
-
-
 # Set parameter
-scalar run_example = 2
+scalar run_example = 1
 
 if run_example == 1
-    open denmark.gdt -p -q  # querterly
-    series y = ldiff(LRM)
+    open data9-13.gdt -p -q  # monthly
+    series y = bkret
 
 elif run_example == 2
-    open AWM18.gdt -p -q  # querterly
+    open AWM18.gdt -p -q     # quarterly
     series y = ldiff(HICP)
 
 
 elif run_example == 3
     open djclose.gdt -q -p
-
-    series obsmajor = $obsmajor
-    series obsminor = $obsminor
-    series obsmicro = $obsmicro
-
-    smpl 1 120
-    series y = djclose      # 5 days business week
-
-    #print y obsmajor obsminor obsmicro -o
-    #stop
+    series y = djclose       # 5 days business week
 endif
 
+# prepare everyting
+bundle b = set_season_plot(y)
 
-season_plot(y, "season_plot.png")
+# Start plotting for difference frequency components
+plot_season_plot(b, "obsmajor", "season_plot_obsmajor.png")
+plot_season_plot(b, "obsminor", "season_plot_obsminor.png")
+if max($pd .= {5,6,7})
+    plot_season_plot(b, "obsmicro", "season_plot_obsmicro.png")
+endif
+
+# Optional: Example on how to configure multiplot font size
+bundle opts = defbundle("FONT_SIZE", 8)
+plot_season_plot(b, "obsmajor", "season_plot_obsmajor_small_font.png", opts)
+
+

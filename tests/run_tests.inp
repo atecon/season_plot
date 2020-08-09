@@ -1,0 +1,37 @@
+set verbose off
+clear
+
+include assertion.gfn
+include string_utils.gfn
+include multiplot.gfn
+
+include "./src/season_plot.inp" --force
+
+
+open denmark.gdt -q -p
+function void test_default_values (const series y)
+    print "Start testing default_values()"
+    print "Start testing seasonal ARIMA parameter"
+
+    bundle B = default_values(y)
+
+    assert_equal_num(B.min_d, 0)
+    assert_equal_num(B.max_d, 1)
+    assert_equal_num(B.min_p, 0)
+    assert_equal_num(B.max_p, 4)
+    assert_equal_num(B.min_q, 0)
+    assert_equal_num(B.max_q, 4)
+
+    assert_equal_num(B.min_D, 0)
+    assert_equal_num(B.max_D, 1)
+    assert_equal_num(B.min_P, 0)
+    assert_equal_num(B.max_P, 1)
+    assert_equal_num(B.min_Q, 0)
+    assert_equal_num(B.max_Q, 1)
+
+    assert_true(B.with_seasonality)
+end function
+test_default_values(LRM)
+
+
+printf "\nInfo: All tests passed.\n"

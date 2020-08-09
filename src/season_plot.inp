@@ -1,6 +1,5 @@
-function void season_plot (const series y,
-                            string filename[null])
-    /*  */
+function bundle set_season_plot (const series y)
+    /*  Compile matrices holding grouped data for plotting. */
 
     errorif($datatype != 2, "Time-series data set needed.")
     errorif($pd == 1, "Time-series has no seasonal frequency.")
@@ -8,7 +7,6 @@ function void season_plot (const series y,
     smpl y --contiguous
 
     # Initializations
-    string filename = (exists(filename)) ? filename : "display"
     bundle self = null
     string yname = argname(y)
 
@@ -16,83 +14,115 @@ function void season_plot (const series y,
 
     list self.frequency_series = get_frequency_series(&self)
 
+    get_frequency_strings(&self)
+
     group_y_by_frequencies(y, &self)
 
-    do_pivoting(&self)
+    do_pivoting(y, &self)
 
-    multiplot(compile_subplots(self), filename)
+    compile_subplots(&self)
 
+    return self
 end function
 
 
-function void do_pivoting (bundle *self)
+function void plot_season_plot (const bundle self,
+                                const string type "Freq. to show on x-axis",
+                                string filename[null],
+                                bundle plot_opts[null] "multiplot() settings")
+    /* Do actualy plotting. User selects which frequency component to put on the x-axis. */
+
+    string filename = (exists(filename)) ? filename : "display"
+    strings to_be_plotted = array(0)
+    strings gp_filenames = self.gp_filenames
+    bundle plot_opts = (exists(plot_opts)) ? plot_opts : null
+    bundle plot_opts = plot_opts + multiplot_settings()
+
+    if self.frequency_components.obsmicro == FALSE
+        errorif(instring(type, "micro"), "Data set has not 'obsmicro' frequency component.")
+    endif
+
+    loop foreach i gp_filenames
+        if instring("$i", sprintf("%s_by", type))
+            to_be_plotted = to_be_plotted + "$i"
+        endif
+    endloop
+
+    multiplot(to_be_plotted, filename, nelem(to_be_plotted), 1, plot_opts)
+end function
+
+
+function bundle multiplot_settings (void)
+    /* Settings for multiplot. */
+
+    bundle opts = null
+    scalar opts.PLOT_WIDTH = 1000
+    scalar opts.PLOT_HEIGHT = 600
+    scalar opts.FONT_SIZE = 12
+
+    return opts
+end function
+
+
+function void do_pivoting (const series y, bundle *self)
     /* Wrapper for calling the actual pivoting steps. */
 
-    matrix self.mplot_obsmajor_by_obsminor = pivot_by_column_name(self.y_grouped_by_frequencies, "obsmajor", "obsminor", "f(x)")
-    matrix self.mplot_obsminor_by_obsmajor = pivot_by_column_name(self.y_grouped_by_frequencies, "obsminor", "obsmajor", "f(x)")
+    bundle self.data_to_plot = null
+    strings cases = getkeys(self.y_grouped_by_frequency)
 
-    if self.frequency_components.obsmicro == TRUE
-        matrix self.mplot_obsmajor_by_obsmicro = pivot_by_column_name(self.y_grouped_by_frequencies, "obsmajor", "obsmicro", "f(x)")
+    loop foreach i cases
+        # Retrieve information
+        string s1 = self.y_grouped_by_frequency["$i"].frequency_1
+        string s2 = self.y_grouped_by_frequency["$i"].frequency_2
 
-        matrix self.mplot_obsminor_by_obsmicro = pivot_by_column_name(self.y_grouped_by_frequencies, "obsminor", "obsmicro", "f(x)")
+        # loop over two combinations, e.g. major-minor, minor-major
+        loop j=1..2
+            string first = (j == 1) ? s1 : s2
+            string second = (j == 1) ? s2 : s1
+            string name = sprintf("mplot_%s_by_%s", first, second)
 
-        matrix self.mplot_obsmicro_by_obsmajor = pivot_by_column_name(self.y_grouped_by_frequencies, "obsmicro", "obsmajor", "f(x)")
-
-        matrix self.mplot_obsmicro_by_obsminor = pivot_by_column_name(self.y_grouped_by_frequencies, "obsmicro", "obsminor", "f(x)")
-    endif
+            matrix self.data_to_plot.@name = pivot_by_column_name(self.y_grouped_by_frequency["$i"].matdata, first, second, "f(x)", self)
+        endloop
+    endloop
 end function
 
 
-function strings compile_subplots (const bundle self)
-    /* Compile all combinations of plots and store gp-file names */
+function void get_frequency_strings (bundle *self)
+    /* Get string abbreviations for each frequency component. */
 
-    strings plot_files = defarray("seasplot1.gp", "seasplot2.gp")
-
-    seasplot(self.mplot_obsmajor_by_obsminor, "seasplot1.gp")
-    seasplot(self.mplot_obsminor_by_obsmajor, "seasplot2.gp")
-
-    if self.frequency_components.obsmicro == TRUE
-        seasplot(self.mplot_obsmajor_by_obsmicro, "seasplot3.gp")
-        seasplot(self.mplot_obsminor_by_obsmicro, "seasplot4.gp")
-        seasplot(self.mplot_obsmicro_by_obsmajor, "seasplot5.gp")
-        seasplot(self.mplot_obsmicro_by_obsminor, "seasplot6.gp")
-
-        plot_files = self.plot_files + defarray(\
-                                        "seasplot3.gp",\
-                                        "seasplot4.gp",\
-                                        "seasplot5.gp",\
-                                        "seasplot6.gp")
+    if maxr($pd .= {5, 6, 7})
+        bundle self.frequency_strings = defbundle(\
+                                        "obsmajor", "Y",
+                                        "obsminor", "M",
+                                        "obsmicro", "D")
+    elif $pd == 12
+        bundle self.frequency_strings = defbundle(\
+                                        "obsmajor", "Y",
+                                        "obsminor", "M")
+    elif $pd == 4
+        bundle self.frequency_strings = defbundle(\
+                                        "obsmajor", "Y",
+                                        "obsminor", "Q")
     endif
-
-    return plot_files
-end function
-
-
-function void seasplot (const matrix x,
-                        const string filename)
-    /* Execute actual plotting. */
-
-    plot x
-        options with-lp fit=none
-        printf "set xlabel ''"
-    end plot --output="@filename"
 end function
 
 
 # TODO: put into separate small package
 # TODO: add another function pivot() where column indizes instead of names are passed
+# TODO: Both 'column' and 'values' may be arrays.
 function matrix pivot_by_column_name (const matrix m,
-                        const string index "Column to use for new index",
+                        const string index "Column to use for new index, xaxis",
                         const string split_column "Add columns using distinct values",
-                        const string values "Column to use for populating new matrix values")
+                        const string values "Column to use for populating new matrix values",
+                        const bundle self)
     /* Transform matrix from long to wide format; also known as pivoting. Inspired by Pandas' pivot() function:
     https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pivot.html
-
-    TODO: Both 'column' and 'values' may be arrays.
     */
 
     scalar n_cols = cols(m)
     errorif(n_cols < 3, "Matrix must comprise at least 3 columns.")
+
+    string frequency_label = self.frequency_strings["@split_column"]
 
     scalar pos_values = instrings(cnameget(m), values)
     scalar pos_split_column = instrings(cnameget(m), split_column)
@@ -110,13 +140,8 @@ function matrix pivot_by_column_name (const matrix m,
     loop i = 1..rows(split_values)
         matrix mask = (split_vector .= split_values[i])
         result ~= selifr(values_vector, mask)
-        colnames[i] = sprintf("v%d", split_values[i])
+        colnames[i] = sprintf("%s%d", frequency_label, split_values[i])
     endloop
-
-    # eval m
-    # eval result
-    # eval index_vector
-    # stop
 
     result ~= index_vector
     colnames[1 + rows(split_values)] = cnameget(m, pos_index_column)
@@ -128,10 +153,61 @@ end function
 
 function void group_y_by_frequencies (const series y,
                                       bundle *self)
-    /* Group y by all frequencies. */
+    /* Wrapper for grouping y by frequencies dependent on data set. */
+
+    bundle self.y_grouped_by_frequency = null
+
+    if self.frequency_components.obsmicro == FALSE
+        group_y_by_freq_no_obsmicro(y, &self)
+    else
+        group_y_by_freq_with_obsmicro(y, &self)
+    endif
+end function
+
+
+function void group_y_by_freq_no_obsmicro (const series y,
+                                          bundle *self)
+    /* Group y by obsmajor and obsminor. This is only relevant in case data set has no obsmicro structure -- simplest case. */
+
+    bundle self.y_grouped_by_frequency.case_a = defbundle(\
+                                            "frequency_1", "obsmajor",\
+                                            "frequency_2", "obsminor")
 
     matrix m = aggregate(y, self.frequency_series, mean)
-    matrix self.y_grouped_by_frequencies = drop_count_column(m)
+    matrix self.y_grouped_by_frequency.case_a.matdata = drop_count_column(m)
+end function
+
+
+function void group_y_by_freq_with_obsmicro (const series y,
+                                            bundle *self)
+    /* More complicate case, as we need to "aggregate out" one of the frequency structures before grouping. Aggregation is done by summing. */
+
+    # 1) mplot_obsmajor_by_obsminor --> aggregate across obsmicro
+    bundle self.y_grouped_by_frequency.case_a = defbundle(\
+                                            "frequency_1", "obsmajor",\
+                                            "frequency_2", "obsminor")
+    list groupby = self.frequency_series
+    groupby -= obsmicro
+    matrix m = aggregate(y, groupby, sum)
+    matrix self.y_grouped_by_frequency.case_a.matdata = drop_count_column(m)
+
+    # 2) mplot_obsmajor_by_obsmicro --> aggregate across obsminor
+    bundle self.y_grouped_by_frequency.case_b = defbundle(\
+                                            "frequency_1", "obsmajor",\
+                                            "frequency_2", "obsmicro")
+    list groupby = self.frequency_series
+    groupby -= obsminor
+    matrix m = aggregate(y, groupby, sum)
+    matrix self.y_grouped_by_frequency.case_b.matdata = drop_count_column(m)
+
+    # 3) mplot_obsminor_by_obsmicro --> aggregate across obsmajor
+    bundle self.y_grouped_by_frequency.case_c = defbundle(\
+                                            "frequency_1", "obsminor",\
+                                            "frequency_2", "obsmicro")
+    list groupby = self.frequency_series
+    groupby -= obsmajor
+    matrix m = aggregate(y, groupby, sum)
+    matrix self.y_grouped_by_frequency.case_c.matdata = drop_count_column(m)
 end function
 
 
@@ -146,6 +222,60 @@ function matrix drop_count_column (matrix m)
     cnameset(m, cnames_new)
 
     return m
+end function
+
+
+function strings sublot_order (void)
+    /* Set the order for subplots. */
+
+    strings sublot_order = defarray(\
+                            "obsmajor_by_obsminor",\
+                            "obsmajor_by_obsmicro",\
+                            "obsminor_by_obsmajor",\
+                            "obsminor_by_obsmicro",\
+                            "obsmicro_by_obsmajor",\
+                            "obsmicro_by_obsminor")
+
+    return sublot_order
+end function
+
+
+function void compile_subplots (bundle *self)
+    /* Compile all combinations of plots and store gp-file names */
+
+    scalar n_combinations = nelem(getkeys(self.data_to_plot))
+    strings sublot_combs = sublot_order()
+    scalar counter = 1
+    strings self.gp_filenames = array(0)
+
+    loop foreach i sublot_combs
+        string matname = sprintf("mplot_%s", sublot_combs[i])
+
+        if inbundle(self.data_to_plot, @matname)
+            # a matrix with a single row cannot be drawn
+            if rows(self.data_to_plot[matname]) > 1
+                self.gp_filenames = self.gp_filenames + sprintf("seasplot_%s.gp", sublot_combs[i])
+                seasplot(self.data_to_plot[matname], self.gp_filenames[counter])
+                counter++
+            endif
+        endif
+
+        if counter > n_combinations
+            break
+        endif
+    endloop
+end function
+
+
+function void seasplot (const matrix x,
+                        const string filename)
+    /* Execute actual plotting. */
+
+    plot x
+        options with-lp fit=none
+        printf "set xlabel ''"
+        literal set grid
+    end plot --output="@filename"
 end function
 
 
@@ -166,7 +296,6 @@ function list get_frequency_series (bundle *self)
 end function
 
 
-
 function void flag_frequency_components (const series y,
                                         bundle *self)
     /* Set flags for the 3 separate frequency components. */
@@ -181,7 +310,7 @@ function void flag_frequency_components (const series y,
         self.frequency_components.obsminor = TRUE
     endif
 
-    if maxr($pd .= {5, 6, 7})  # TODO: really all??
+    if maxr($pd .= {5, 6, 7})
         self.frequency_components.obsmicro = TRUE
     endif
 end function
