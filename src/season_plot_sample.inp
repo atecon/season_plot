@@ -1,7 +1,7 @@
 clear
 set verbose off
 
-set workdir "/home/at/git/seasonality_plot/src"
+set workdir "/home/at/git/season_plot/src"
 
 include string_utils.gfn
 include multiplot.gfn
