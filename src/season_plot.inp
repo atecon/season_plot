@@ -8,7 +8,6 @@ function bundle set_season_plot (const series y)
 
     # Initializations
     bundle self = null
-    string yname = argname(y)
 
     flag_frequency_components(y, &self)
 
