@@ -9,7 +9,7 @@ include season_plot.inp --force
 
 
 # Set parameter
-scalar run_example = 1
+scalar run_example = 2
 
 if run_example == 1
     open data9-13.gdt -p -q  # monthly

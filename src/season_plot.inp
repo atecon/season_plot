@@ -118,10 +118,8 @@ function matrix pivot_by_column_name (const matrix m,
     https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pivot.html
     */
 
-    scalar n_cols = cols(m)
-    errorif(n_cols < 3, "Matrix must comprise at least 3 columns.")
-
     string frequency_label = self.frequency_strings["@split_column"]
+    matrix result = {}
 
     scalar pos_values = instrings(cnameget(m), values)
     scalar pos_split_column = instrings(cnameget(m), split_column)
@@ -135,7 +133,6 @@ function matrix pivot_by_column_name (const matrix m,
     matrix values_vector = m[, pos_values]
     matrix index_vector = values(m[, pos_index_column]) # will be the x-axis in the following plot
 
-    matrix result = {}
     loop i = 1..rows(split_values)
         matrix mask = (split_vector .= split_values[i])
         result ~= selifr(values_vector, mask)
@@ -225,7 +222,7 @@ function matrix drop_count_column (matrix m)
     /* Drop "count" column. */
 
     cnames_old = cnameget(m)
-    scalar pos = instrings(cnames_old, "count")
+    scalar pos = instrings(cnames_old, "count")     # breaks of no 'count' col exists
     cnames_new = strdrop(cnames_old, "count")
 
     m = m[,-pos]
