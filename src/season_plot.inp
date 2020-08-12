@@ -164,13 +164,30 @@ function void group_y_by_frequencies (const series y,
 end function
 
 
+function void add_frequency_case_bundles (bundle *self, string case "a, b or c")
+    /* Compile bundle holding the keywords for both frequencies needed for grouping. */
+
+    if case == "a"
+        bundle self.y_grouped_by_frequency.case_a = defbundle(\
+                                            "frequency_1", "obsmajor",\
+                                            "frequency_2", "obsminor")
+    elif case == "b"
+        bundle self.y_grouped_by_frequency.case_b = defbundle(\
+                                            "frequency_1", "obsmajor",\
+                                            "frequency_2", "obsmicro")
+    elif case == "c"
+        bundle self.y_grouped_by_frequency.case_c = defbundle(\
+                                            "frequency_1", "obsminor",\
+                                            "frequency_2", "obsmicro")
+    endif
+end function
+
+
 function void group_y_by_freq_no_obsmicro (const series y,
                                           bundle *self)
     /* Group y by obsmajor and obsminor. This is only relevant in case data set has no obsmicro structure -- simplest case. */
 
-    bundle self.y_grouped_by_frequency.case_a = defbundle(\
-                                            "frequency_1", "obsmajor",\
-                                            "frequency_2", "obsminor")
+    add_frequency_case_bundles(&self, "a")
 
     matrix m = aggregate(y, self.frequency_series, mean)
     matrix self.y_grouped_by_frequency.case_a.matdata = drop_count_column(m)
@@ -182,27 +199,21 @@ function void group_y_by_freq_with_obsmicro (const series y,
     /* More complicate case, as we need to "aggregate out" one of the frequency structures before grouping. Aggregation is done by summing. */
 
     # 1) mplot_obsmajor_by_obsminor --> aggregate across obsmicro
-    bundle self.y_grouped_by_frequency.case_a = defbundle(\
-                                            "frequency_1", "obsmajor",\
-                                            "frequency_2", "obsminor")
+    add_frequency_case_bundles(&self, "a")
     list groupby = self.frequency_series
     groupby -= obsmicro
     matrix m = aggregate(y, groupby, sum)
     matrix self.y_grouped_by_frequency.case_a.matdata = drop_count_column(m)
 
     # 2) mplot_obsmajor_by_obsmicro --> aggregate across obsminor
-    bundle self.y_grouped_by_frequency.case_b = defbundle(\
-                                            "frequency_1", "obsmajor",\
-                                            "frequency_2", "obsmicro")
+    add_frequency_case_bundles(&self, "b")
     list groupby = self.frequency_series
     groupby -= obsminor
     matrix m = aggregate(y, groupby, sum)
     matrix self.y_grouped_by_frequency.case_b.matdata = drop_count_column(m)
 
     # 3) mplot_obsminor_by_obsmicro --> aggregate across obsmajor
-    bundle self.y_grouped_by_frequency.case_c = defbundle(\
-                                            "frequency_1", "obsminor",\
-                                            "frequency_2", "obsmicro")
+    add_frequency_case_bundles(&self, "c")
     list groupby = self.frequency_series
     groupby -= obsmajor
     matrix m = aggregate(y, groupby, sum)

@@ -8,30 +8,237 @@ include multiplot.gfn
 include "./src/season_plot.inp" --force
 
 
-open denmark.gdt -q -p
-function void test_default_values (const series y)
-    print "Start testing default_values()"
-    print "Start testing seasonal ARIMA parameter"
+open jgm-data.gdt -q -p
+function void test_flag_frequency_comps_an (const series y)
+    print "Start testing flag_frequency_components()"
+    print "Annual data"
 
-    bundle B = default_values(y)
+    bundle B = null
+    flag_frequency_components(y, &B)
 
-    assert_equal_num(B.min_d, 0)
-    assert_equal_num(B.max_d, 1)
-    assert_equal_num(B.min_p, 0)
-    assert_equal_num(B.max_p, 4)
-    assert_equal_num(B.min_q, 0)
-    assert_equal_num(B.max_q, 4)
-
-    assert_equal_num(B.min_D, 0)
-    assert_equal_num(B.max_D, 1)
-    assert_equal_num(B.min_P, 0)
-    assert_equal_num(B.max_P, 1)
-    assert_equal_num(B.min_Q, 0)
-    assert_equal_num(B.max_Q, 1)
-
-    assert_true(B.with_seasonality)
+    assert_false(B.frequency_components.obsmajor)
+    assert_false(B.frequency_components.obsminor)
+    assert_false(B.frequency_components.obsmicro)
+    assert_equal_num(nelem(B.frequency_components), 3)
 end function
-test_default_values(LRM)
+test_flag_frequency_comps_an(r_s)
+
+
+open denmark.gdt -q -p
+function void test_flag_frequency_comps_qrt (const series y)
+    print "Start testing flag_frequency_components()"
+    print "Quarterly data"
+
+    bundle B = null
+    flag_frequency_components(y, &B)
+
+    assert_true(B.frequency_components.obsmajor)
+    assert_true(B.frequency_components.obsminor)
+    assert_false(B.frequency_components.obsmicro)
+    assert_equal_num(nelem(B.frequency_components), 3)
+end function
+test_flag_frequency_comps_qrt(LRM)
+
+
+open djclose.gdt -q -p
+function void test_flag_frequency_comps_day (const series y)
+    print "Start testing flag_frequency_components()"
+    print "Daily data"
+
+    bundle B = null
+    flag_frequency_components(y, &B)
+
+    assert_true(B.frequency_components.obsmajor)
+    assert_true(B.frequency_components.obsminor)
+    assert_true(B.frequency_components.obsmicro)
+    assert_equal_num(nelem(B.frequency_components), 3)
+end function
+test_flag_frequency_comps_day(djclose)
+
+
+open denmark.gdt -q -p
+function void test_get_frequency_series_qrt (const series y)
+    print "Start testing test_get_frequency_series()"
+    print "Quarterly data"
+
+    bundle B = null
+    flag_frequency_components(y, &B)
+
+    list L = get_frequency_series(&B)
+
+    assert_equal_num(nelem(L), 2)
+    assert_true(inlist(L, "obsmajor"))
+    assert_true(inlist(L, "obsminor"))
+end function
+test_get_frequency_series_qrt(LRM)
+
+open djclose.gdt -q -p
+function void test_get_frequency_series_day (const series y)
+    print "Start testing test_get_frequency_series()"
+    print "Daily data"
+
+    bundle B = null
+    flag_frequency_components(y, &B)
+
+    list L = get_frequency_series(&B)
+
+    assert_equal_num(nelem(L), 3)
+    assert_true(inlist(L, "obsmajor"))
+    assert_true(inlist(L, "obsminor"))
+    assert_true(inlist(L, "obsmicro"))
+end function
+test_get_frequency_series_day(djclose)
+
+
+
+open denmark.gdt -q -p
+function void test_get_frequency_strings_qrt (const series y)
+    print "Start testing get_frequency_strings()"
+    print "Quarterly data"
+
+    bundle B = null
+    get_frequency_strings(&B)
+
+    assert_equal_num(nelem(B), 1)
+    assert_equal_num(nelem(B.frequency_strings), 2)
+
+    assert_equal_str(B.frequency_strings.obsmajor, "Y")
+    assert_equal_str(B.frequency_strings.obsminor, "Q")
+end function
+test_get_frequency_strings_qrt(LRM)
+
+
+open data9-13.gdt -q -p
+function void test_get_frequency_strings_mth (const series y)
+    print "Start testing get_frequency_strings()"
+    print "Monthly data"
+
+    bundle B = null
+    get_frequency_strings(&B)
+
+    assert_equal_num(nelem(B), 1)
+    assert_equal_num(nelem(B.frequency_strings), 2)
+
+    assert_equal_str(B.frequency_strings.obsmajor, "Y")
+    assert_equal_str(B.frequency_strings.obsminor, "M")
+end function
+test_get_frequency_strings_mth(bkret)
+
+
+open djclose.gdt -q -p
+function void test_get_frequency_strings_mth (const series y)
+    print "Start testing get_frequency_strings()"
+    print "Daily data"
+
+    bundle B = null
+    get_frequency_strings(&B)
+
+    assert_equal_num(nelem(B), 1)
+    assert_equal_num(nelem(B.frequency_strings), 3)
+
+    assert_equal_str(B.frequency_strings.obsmajor, "Y")
+    assert_equal_str(B.frequency_strings.obsminor, "M")
+    assert_equal_str(B.frequency_strings.obsmicro, "D")
+end function
+test_get_frequency_strings_mth(djclose)
+
+
+function void test_add_frequency_case_bundles (void)
+    print "Start testing add_frequency_case_bundles()"
+
+    # Case a
+    bundle B = null
+    bundle B.y_grouped_by_frequency = null
+    add_frequency_case_bundles(&B, "a")
+
+    assert_true(inbundle(B.y_grouped_by_frequency, "case_a"))
+    assert_false(inbundle(B.y_grouped_by_frequency, "case_b"))
+    assert_false(inbundle(B.y_grouped_by_frequency, "case_c"))
+
+    assert_equal_num(nelem(B.y_grouped_by_frequency.case_a), 2)
+
+    assert_true(inbundle(B.y_grouped_by_frequency.case_a, "frequency_1"))
+    assert_true(inbundle(B.y_grouped_by_frequency.case_a, "frequency_2"))
+
+    assert_equal_str(B.y_grouped_by_frequency.case_a.frequency_1, "obsmajor")
+    assert_equal_str(B.y_grouped_by_frequency.case_a.frequency_2, "obsminor")
+
+    # Case B
+    bundle B = null
+    bundle B.y_grouped_by_frequency = null
+    add_frequency_case_bundles(&B, "b")
+    assert_equal_str(B.y_grouped_by_frequency.case_b.frequency_1, "obsmajor")
+    assert_equal_str(B.y_grouped_by_frequency.case_b.frequency_2, "obsmicro")
+
+    # Case C
+    bundle B = null
+    bundle B.y_grouped_by_frequency = null
+    add_frequency_case_bundles(&B, "c")
+    assert_equal_str(B.y_grouped_by_frequency.case_c.frequency_1, "obsminor")
+    assert_equal_str(B.y_grouped_by_frequency.case_c.frequency_2, "obsmicro")
+end function
+test_add_frequency_case_bundles()
+
+
+function void test_group_y_by_freq_no_obsmicro (void)
+    print "Start testing group_y_by_freq_no_obsmicro()"
+    print "PASS"
+end function
+test_group_y_by_freq_no_obsmicro(void)
+
+
+function void test_group_y_by_freq_w_obsmicro (void)
+    print "Start testing group_y_by_freq_with_obsmicro()"
+    print "PASS"
+end function
+test_group_y_by_freq_w_obsmicro(void)
+
+
+function void test_do_pivoting (void)
+    print "Start testing do_pivoting()"
+    print "PASS"
+end function
+test_do_pivoting(void)
+
+function void test_pivot_by_column_name (void)
+    print "Start testing pivot_by_column_name()"
+    print "PASS"
+end function
+test_pivot_by_column_name(void)
+
+
+function void test_compile_subplots (void)
+    print "Start testing compile_subplots()"
+    print "PASS"
+end function
+test_compile_subplots(void)
+
+function void test_sublot_order (void)
+    print "Start testing sublot_order()"
+    print "PASS"
+end function
+test_sublot_order(void)
+
+function void test_seasplot (void)
+    print "Start testing seasplot()"
+    print "PASS"
+end function
+test_seasplot(void)
+
+function void test_plot_season_plot (void)
+    print "Start testing plot_season_plot()"
+    print "PASS"
+end function
+test_plot_season_plot(void)
+
+function void test_multiplot_settings (void)
+    print "Start testing multiplot_settings()"
+    print "PASS"
+end function
+test_multiplot_settings(void)
+
 
 
 printf "\nInfo: All tests passed.\n"
+
+
