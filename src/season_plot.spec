@@ -1,14 +1,15 @@
 author = Artur Tarassow
 email = atecon@posteo.de
 version = 0.1
-date = 2020-08-10
+date = 2020-08-17
 description = Plot seasonal time-series components
 tags = C22
 min-version = 2020b
-public = set_season_plot plot_season_plot
+public = set_season_plot plot_season_plot season_plot_gui
 data-requirement = needs-time-series-data
 help = season_plot_help.txt
 sample-script = season_plot_sample.inp
 gui-main = season_plot_gui
 label = Season Plot
 menu-attachment = MAINWIN/View/GraphVars
+depends = string_utils multiplot

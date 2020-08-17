@@ -1,15 +1,11 @@
 clear
 set verbose off
 
-set workdir "/home/at/git/season_plot/src"
-
-include string_utils.gfn
-include multiplot.gfn
-include season_plot.inp --force
+include season_plot.gfn
 
 
-# Set parameter
-scalar run_example = 2
+# Select a data set
+scalar run_example = 1
 
 if run_example == 1
     open data9-13.gdt -p -q  # monthly
@@ -19,14 +15,15 @@ elif run_example == 2
     open AWM18.gdt -p -q     # quarterly
     series y = ldiff(HICP)
 
-
 elif run_example == 3
     open djclose.gdt -q -p
     series y = djclose       # 5 days business week
 endif
 
+
 # prepare everyting
 bundle b = set_season_plot(y)
+
 
 # Start plotting for difference frequency components
 plot_season_plot(b, "obsmajor", "season_plot_obsmajor.png")
@@ -36,7 +33,16 @@ if max($pd .= {5,6,7})
 endif
 
 # Optional: Example on how to configure multiplot font size
-bundle opts = defbundle("FONT_SIZE", 8)
-plot_season_plot(b, "obsmajor", "season_plot_obsmajor_small_font.png", opts)
+# Fine tune plot by controlling parameters
+scalar b.PLOT_WIDTH = 900
+scalar b.FONT_SIZE = 8
+plot_season_plot(b, "obsmajor", "season_plot_obsmajor_small_font.png")
 
 
+# You may want to look at the pivoted matrices
+# eval b.data_to_plot
+# eval b.data_to_plot.mplot_obsminor_by_obsmajor
+
+
+# Optionally, instantly show some plot
+# season_plot_gui(y, 2)  # 1=obsmajor, 2=obsminor, 3=obsmicro

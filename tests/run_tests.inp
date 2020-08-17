@@ -102,8 +102,8 @@ function void test_get_frequency_strings_qrt (const series y)
     assert_equal_num(nelem(B), 1)
     assert_equal_num(nelem(B.frequency_strings), 2)
 
-    assert_equal_str(B.frequency_strings.obsmajor, "Y")
-    assert_equal_str(B.frequency_strings.obsminor, "Q")
+    assert_equal_str(B.frequency_strings.obsmajor, "Year")
+    assert_equal_str(B.frequency_strings.obsminor, "Quarter")
 end function
 test_get_frequency_strings_qrt(LRM)
 
@@ -119,8 +119,8 @@ function void test_get_frequency_strings_mth (const series y)
     assert_equal_num(nelem(B), 1)
     assert_equal_num(nelem(B.frequency_strings), 2)
 
-    assert_equal_str(B.frequency_strings.obsmajor, "Y")
-    assert_equal_str(B.frequency_strings.obsminor, "M")
+    assert_equal_str(B.frequency_strings.obsmajor, "Year")
+    assert_equal_str(B.frequency_strings.obsminor, "Month")
 end function
 test_get_frequency_strings_mth(bkret)
 
@@ -136,9 +136,9 @@ function void test_get_frequency_strings_mth (const series y)
     assert_equal_num(nelem(B), 1)
     assert_equal_num(nelem(B.frequency_strings), 3)
 
-    assert_equal_str(B.frequency_strings.obsmajor, "Y")
-    assert_equal_str(B.frequency_strings.obsminor, "M")
-    assert_equal_str(B.frequency_strings.obsmicro, "D")
+    assert_equal_str(B.frequency_strings.obsmajor, "Year")
+    assert_equal_str(B.frequency_strings.obsminor, "Month")
+    assert_equal_str(B.frequency_strings.obsmicro, "Day")
 end function
 test_get_frequency_strings_mth(djclose)
 
@@ -186,7 +186,7 @@ function void test_multiplot_settings (void)
     bundle B = multiplot_settings()
 
     assert_equal_num(nelem(B), 3)
-    assert_equal_num(B.PLOT_WIDTH, 1000)
+    assert_equal_num(B.PLOT_WIDTH, 900)
     assert_equal_num(B.PLOT_HEIGHT, 600)
     assert_equal_num(B.FONT_SIZE, 12)
 end function
@@ -378,6 +378,21 @@ function void test_pivot_by_column_name (void)
     assert_equal_num(r[2,3], 5)
 end function
 test_pivot_by_column_name()
+
+function void test_get_plot_opts_from_self (void)
+    print "Start testing get_plot_opts_from_self()"
+
+    bundle B = null
+    bundle R = get_plot_opts_from_self(B)
+    assert_equal_num(nelem(R), 0)
+
+    bundle B = defbundle("FONT_SIZE", 5)
+    bundle R = get_plot_opts_from_self(B)
+    assert_equal_num(nelem(R), 1)
+
+    assert_equal_num(B.FONT_SIZE, 5)
+end function
+test_get_plot_opts_from_self()
 
 
 function void test_do_pivoting (void)
