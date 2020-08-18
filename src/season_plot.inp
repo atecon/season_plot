@@ -1,13 +1,50 @@
-function bundle set_season_plot (const series y)
+function void season_plot_gui (const series y,
+                               int Frequency[1:3:1] "Freq. to _show on x-axis" {"major (usually year)", "minor (usually Q or M)", "micro (usually day)"},
+                               const int PLOT_WIDTH[600::900] "Width of plot",
+                               const int PLOT_HEIGHT[400::600] "Height of plot",
+                               const int FONT_SIZE[6::12] "Font size")
+    /* Helper function for GUI access. */
+
+    bundle opts = defbundle(\
+                "PLOT_WIDTH", PLOT_WIDTH,\
+                "PLOT_HEIGHT", PLOT_HEIGHT,\
+                "FONT_SIZE", FONT_SIZE)
+
+    if Frequency == 1
+        string type = "obsmajor"
+    elif Frequency == 2
+        string type = "obsminor"
+    elif Frequency == 3
+        string type = "obsmicro"
+    endif
+
+    bundle B = set_season_plot(y, argname(y)) + opts
+
+    plot_season_plot(B, type, "display")
+end function
+
+
+function void check_multiplot_version (void)
+    /* */
+
+    pkg query multiplot --quiet
+    errorif($result.version < 0.2, "Update the multiplot package to version 0.2, please.")
+end function
+
+
+function bundle set_season_plot (const series y,
+                                const string name_y[null] "Only for GUI access")
     /*  Compile matrices holding grouped data for plotting. */
 
     errorif($datatype != 2, "Time-series data set needed.")
     errorif($pd == 1, "Time-series has no seasonal frequency.")
+    check_multiplot_version()
 
     smpl y --contiguous
 
     # Initializations
     bundle self = null
+    string self.name_y = (exists(name_y) ? name_y : argname(y))
 
     flag_frequency_components(y, &self)
 
@@ -27,13 +64,15 @@ end function
 
 function void plot_season_plot (const bundle self,
                                 const string type "Freq. to show on x-axis",
-                                string filename[null],
-                                bundle plot_opts[null] "multiplot() settings")
+                                string filename[null])
     /* Do actualy plotting. User selects which frequency component to put on the x-axis. */
 
     string filename = (exists(filename)) ? filename : "display"
     strings to_be_plotted = array(0)
     strings gp_filenames = self.gp_filenames
+
+    bundle plot_opts = get_plot_opts_from_self(self)
+
     bundle plot_opts = (exists(plot_opts)) ? plot_opts : null
     bundle plot_opts = plot_opts + multiplot_settings()
 
@@ -51,11 +90,27 @@ function void plot_season_plot (const bundle self,
 end function
 
 
+function bundle get_plot_opts_from_self (const bundle self)
+    /* Put passed parameters for multiplot() function into a separate bundle. */
+
+    bundle B = null
+    strings valid_keys = getkeys(multiplot_settings())
+
+    loop foreach i valid_keys
+        if inbundle(self, "$i")
+            B["$i"] = self["$i"]
+        endif
+    endloop
+
+    return B
+end function
+
+
 function bundle multiplot_settings (void)
     /* Settings for multiplot. */
 
     bundle opts = null
-    scalar opts.PLOT_WIDTH = 1000
+    scalar opts.PLOT_WIDTH = 900
     scalar opts.PLOT_HEIGHT = 600
     scalar opts.FONT_SIZE = 12
 
@@ -91,17 +146,17 @@ function void get_frequency_strings (bundle *self)
 
     if maxr($pd .= {5, 6, 7})
         bundle self.frequency_strings = defbundle(\
-                                        "obsmajor", "Y",
-                                        "obsminor", "M",
-                                        "obsmicro", "D")
+                                        "obsmajor", "Year",
+                                        "obsminor", "Month",
+                                        "obsmicro", "Day")
     elif $pd == 12
         bundle self.frequency_strings = defbundle(\
-                                        "obsmajor", "Y",
-                                        "obsminor", "M")
+                                        "obsmajor", "Year",
+                                        "obsminor", "Month")
     elif $pd == 4
         bundle self.frequency_strings = defbundle(\
-                                        "obsmajor", "Y",
-                                        "obsminor", "Q")
+                                        "obsmajor", "Year",
+                                        "obsminor", "Quarter")
     endif
 end function
 
@@ -118,7 +173,7 @@ function matrix pivot_by_column_name (const matrix m,
     https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.pivot.html
     */
 
-    string frequency_label = self.frequency_strings["@split_column"]
+    string frequency_label = substr(self.frequency_strings["@split_column"], 1, 1)
     matrix result = {}
 
     scalar pos_values = instrings(cnameget(m), values)
@@ -262,7 +317,8 @@ function void compile_subplots (bundle *self)
             # a matrix with a single row cannot be drawn
             if rows(self.data_to_plot[matname]) > 1
                 self.gp_filenames = self.gp_filenames + sprintf("seasplot_%s.gp", sublot_combs[i])
-                seasplot(self.data_to_plot[matname], self.gp_filenames[counter])
+
+                seasplot(matname, counter, self)
                 counter++
             endif
         endif
@@ -274,13 +330,19 @@ function void compile_subplots (bundle *self)
 end function
 
 
-function void seasplot (const matrix x,
-                        const string filename)
+function void seasplot (const string matname,
+                        const int gpfile_id,
+                        const bundle self)
     /* Execute actual plotting. */
 
-    plot x
+    string filename = self.gp_filenames[gpfile_id]
+    matrix m = self.data_to_plot[matname]
+    strings cnames = cnameget(m)
+
+    plot m
         options with-lp fit=none
-        printf "set xlabel ''"
+        printf "set xlabel '%s'", self.frequency_strings[cnames[nelem(cnames)]]
+        printf "set ylabel '%s'", self.name_y
         literal set grid
     end plot --output="@filename"
 end function
