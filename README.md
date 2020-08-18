@@ -50,6 +50,7 @@ You can also call the functionalities via the GUI menu View -> Graph specified v
 
 ![sample](https://github.com/atecon/seasonality_plot/blob/master/gui.png)
 
+
 # Public functions
 
 The package comprises the three public functions set_season_plot(), plot_season_plot() and season_plot_gui(). The season_plot_gui() function is mainly a wrapper for GUI access but may be also called via scripting as a "short-cut" way for immediately showing a plot on the screen.
