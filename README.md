@@ -1,13 +1,10 @@
 # season_plot
 
-Plot seasonal components of a time-series by frequency groups.
-
-This package computes and depicts a time-series across sub-periods, also
-called a Buys-Ballot plot.
+This package computes and depicts a time-series across sub-periods, also called a Buys-Ballot plot.
 
 For instance, if one has a quarterly time-series one can plot the dynamics of each quarter across years. Vice versa, you may also be interested in plotting the dynamics of each year's quarter.
 
-Note, you may also try the user-written gretl package ```buys_ballot``` written by Ignacio Diaz-Emparanza and Riccardo (Jack) Lucchetti. It essentially shares similar features but does not support all frequency combinations.
+Note, you may also try the user-written gretl package ```buys_ballot``` written by Ignacio Diaz-Emparanza and Riccardo (Jack) Lucchetti (http://ricardo.ecn.wfu.edu/gretl/cgi-bin/current_fnfiles/buys_ballot.gfn). It essentially shares similar features but does not support all frequency combinations.
 
 # Installation and usage
 
@@ -16,7 +13,7 @@ Get the package from the gretl package server and install it:
 pkg install season_plot
 ```
 
-Here is a sample script on how to use it (see also: https://raw.githubusercontent.com/atecon/season_plot/master/src/season_plot_sample.inp):
+Here is a sample script on how to use it (see also: https://raw.githubusercontent.com/atecon/seasonality_plot/master/src/season_plot_sample.inp):
 
 ```
 clear
@@ -25,31 +22,30 @@ open denmark -q
 
 include season_plot.gfn
 
-open data9-13.gdt -p -q  # monthly
-series y = bkret
+open data9-13.gdt -p -q  # monthly frequency
 
 # prepare bundle object
-bundle b = set_season_plot(y)
+bundle b = set_season_plot(bkret)
 
 # Start plotting for the "obsmajor" (here year) frequency component
 plot_season_plot(b, "obsmajor", "display")
 ```
 
-See that we've passed as the 2nd argument the string "obsmajor" which refers to the lowest frequency comonent (year) the monthly time-series data set. The resulting figure shows the dynamics of each month between the years 1990 and 1998:
+See that we've passed as the 2nd argument the string "obsmajor" which refers to the lowest frequency component (year) the monthly time-series data set. The resulting figure shows the dynamics of each month between the years 1990 and 1998:
 
-![sample](https://github.com/atecon/season_plot/raw/master/plot1.png)
+![sample](https://github.com/atecon/seasonality_plot/blob/master/plot1.png)
 
-Dependent on the frequency of the time-series, gretl distinguishes between the three fruency components "obsmajor" (typically 'year'), "obsminor" (typically 'month' or quarter) and obsmicro (typically 'day'). If
+Dependent on the frequency of the time-series, gretl distinguishes between the three fruency components "obsmajor" (typically 'year'), "obsminor" (typically 'month' or quarter) and obsmicro (typically 'day'). Simply replace "obsmajor" by one of those components.
 
 
-# Publich functions
+# Public functions
 
 The package comprises the three public functions set_season_plot(), plot_season_plot() and season_plot_gui(). The season_plot_gui() function is mainly a wrapper for GUI access but may be also called via scripting as a "short-cut" way for immediately showing a plot on the screen.
 
 The set_season_plot() function sets all necessary information, runs some checks and computes the matrices holding the actual results. Informations is stored in a bundle. The function plot_season_plot() calls this bundle and plots the requested result. Due to this two-step approach, the necessary computation has to be done only once.
 
 
-Function:       *set_season_plot(const series y, const string name_y[null])*
+**Function**:       *set_season_plot(const series y, const string name_y[null])*
 
 This function initializes various things and computes the pivoted matrices.
 
@@ -57,11 +53,10 @@ Arguments:
 - ```y```:    series, Variable of interest
 - ```name_y```:    string, Pass name of series 'y' (optional) -- only relevant for GUI wrapper and not for the user.
 
-Return: *Bundle comprising the various items. You may be interested in the pivoted matrices stored under: <BUNDLE_NAME>["data_to_plot"]*
--------------------
+**Return**: *Bundle comprising the various items. You may be interested in the pivoted matrices stored under: <BUNDLE_NAME>["data_to_plot"]*
 
 
-Function:       *plot_season_plot (const bundle self, const string type, string filename[null])*
+**Function**:       *plot_season_plot (const bundle self, const string type, string filename[null])*
 
 This function calls the actual plotting facility.
 
@@ -75,11 +70,10 @@ Arguments:
 	               	or 'obsmicro'.
 - ```filename```: 	string, Full path and file name for storing plot.
 
-Return: *No return value*
----------------------
+**Return**: *No return value*
 
 
-Function:       *season_plot_gui (const series y, int frequency, const int PLOT_WIDTH, const int PLOT_HEIGHT, const int FONT_SIZE)*
+**Function**:       *season_plot_gui (const series y, int frequency, const int PLOT_WIDTH, const int PLOT_HEIGHT, const int FONT_SIZE)*
 
 This function is supposed to be for GUI access only.
 
@@ -90,8 +84,8 @@ Arguments:
 - ```PLOT_HEIGHT```: int, control height of the plot (default 600)
 - ```FONT_SIZE```:   int, control font size (default 12)
 
-Return: *No return value. Instant plot on screen.*
----------------------
+**Return**: *No return value. Instant plot on screen.*
+
 
 ## Notes on frequency components
 
@@ -109,6 +103,8 @@ The user can pass the following optional parameters before calling the function 
 - PLOT_HEIGHT:       int, Control height of the plot (default 600)
 - FONT_SIZE:         int, Control font site (default 12)
 
+# Tests
+The package includes unit-tests under <./tests/run_tests.inp>. Simply execute the shell-script <./run_tests.sh>.
 
 # Changelog
 - v0.1, August 2020:
