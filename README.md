@@ -45,6 +45,10 @@ plot_season_plot(b, "obsminor", "display")
 
 ![sample](https://github.com/atecon/seasonality_plot/blob/master/plot2.png)
 
+# GUI access
+You can also call the functionalities via the GUI menu View -> Graph specified vars -> Season Plot".
+
+![sample](https://github.com/atecon/seasonality_plot/blob/master/gui.png)
 
 # Public functions
 
