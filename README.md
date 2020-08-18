@@ -35,7 +35,15 @@ See that we've passed as the 2nd argument the string "obsmajor" which refers to 
 
 ![sample](https://github.com/atecon/seasonality_plot/blob/master/plot1.png)
 
-Dependent on the frequency of the time-series, gretl distinguishes between the three fruency components "obsmajor" (typically 'year'), "obsminor" (typically 'month' or quarter) and obsmicro (typically 'day'). Simply replace "obsmajor" by one of those components.
+Dependent on the frequency of the time-series, gretl distinguishes between the three fruency components "obsmajor" (typically 'year'), "obsminor" (typically 'month' or quarter) and obsmicro (typically 'day').
+
+The following command shows how the monthly component 'behaves' across different years
+
+```
+plot_season_plot(b, "obsminor", "display")
+```
+
+![sample](https://github.com/atecon/seasonality_plot/blob/master/plot2.png)
 
 
 # Public functions
@@ -89,15 +97,15 @@ Arguments:
 
 ## Notes on frequency components
 
-For details on frequency components, we refer to the gretl help. For instance check the help for the ```$obsmajor``` accessor (<help $obsmajor>). For most standard time-series frequencies, 'obsmajor' refers to the year, 'obsminor' to the quarter or month, and 'obsmicro' to the day of a month.
+For details on frequency components, we refer to the gretl help. For instance check the help for the ```$obsmajor``` accessor (```help $obsmajor```). For most standard time-series frequencies, 'obsmajor' refers to the year, 'obsminor' to the quarter or month, and 'obsmicro' to the day of a month.
 
 Things are different, when working with hourly data. In this case 'obsmajor' refers to the day and 'obsminor' to the hour ('obsmicro' is not defined for this frequency).
 
-Non-standard frequencies set manually with the 'setobs' command may or may not work. In such cases please think in terms of major and minor frequency components and disregard the standard frequency labels in this package.
+Non-standard frequencies set manually with the ```setobs``` command may or may not work. In such cases please think in terms of major and minor frequency components and disregard the standard frequency labels in this package.
 
 ## The optional parameters for controlling multiplot output
 
-The user can pass the following optional parameters before calling the function ```plot_seasonal_plot()```:
+The user can pass the following optional parameters before calling the function plot_seasonal_plot():
 
 - PLOT_WIDTH:        int, Control width of the plot (default 900)
 - PLOT_HEIGHT:       int, Control height of the plot (default 600)
@@ -109,4 +117,3 @@ The package includes unit-tests under <./tests/run_tests.inp>. Simply execute th
 # Changelog
 - v0.1, August 2020:
     + initial release
-
