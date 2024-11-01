@@ -1,6 +1,9 @@
 clear
 set verbose off
 
+# pkg install season_plot  # install the package (only once needed)
+# help season_plot         # read the documentation
+
 include season_plot.gfn
 
 
@@ -26,16 +29,23 @@ bundle b = set_season_plot(y)
 
 
 # Start plotting for difference frequency components
-plot_season_plot(b, "obsmajor", "season_plot_obsmajor.png")
-plot_season_plot(b, "obsminor", "season_plot_obsminor.png")
+plot_season_plot(b, "obsmajor")
+plot_season_plot(b, "obsminor")
 if max($pd .= {5,6,7})
-    plot_season_plot(b, "obsmicro", "season_plot_obsmicro.png")
+    plot_season_plot(b, "obsmicro")
 endif
+
+if run_example == 1
+    # Gridplot with all components and store it
+    plot_season_plot(b, "all", "season_plot_all.png")
+endif
+
 
 # Optional: Example on how to configure multiplot font size
 # Fine tune plot by controlling parameters
-scalar b.PLOT_WIDTH = 900
-scalar b.FONT_SIZE = 8
+scalar b.plot_width = 900
+scalar b.font_size = 8
+string b.title = "Seasonal plot with small font size"
 plot_season_plot(b, "obsmajor", "season_plot_obsmajor_small_font.png")
 
 
@@ -43,6 +53,5 @@ plot_season_plot(b, "obsmajor", "season_plot_obsmajor_small_font.png")
 # eval b.data_to_plot
 # eval b.data_to_plot.mplot_obsminor_by_obsmajor
 
-
 # Optionally, instantly show some plot
-# season_plot_gui(y, 2)  # 1=obsmajor, 2=obsminor, 3=obsmicro
+# season_plot_gui(y, 2)  # 1=obsmajor, 2=obsminor, 3=obsmicro, 4=all
