@@ -1,124 +1,107 @@
-# season_plot
+# Season Plot Package
 
-This package computes and depicts a time-series across sub-periods, also called a Buys-Ballot plot.
+Plot seasonal components of a time-series by frequency groups.
 
-For instance, if one has a quarterly time-series one can plot the dynamics of each quarter across years. Vice versa, you may also be interested in plotting the dynamics of each year's quarter.
+This package computes and depicts a time-series across sub-periods, also called a Buys-Ballot plot. For instance, if one has a quarterly time-series one can plot the dynamics of each quarter across years. Vice versa, you may also be interested in plotting the dynamics of each year's quarter.
 
-Note, you may also try the user-written gretl package ```buys_ballot``` written by Ignacio Diaz-Emparanza and Riccardo (Jack) Lucchetti (http://ricardo.ecn.wfu.edu/gretl/cgi-bin/current_fnfiles/buys_ballot.gfn). It essentially shares similar features but does not support all frequency combinations.
+Note, you may also try the user-written gretl package "buys_ballot" written by Ignacio Diaz-Emparanza and Riccardo (Jack) Lucchetti. It essentially shares similar features but does not support all frequency combinations.
 
-# Installation and usage
+You can also call the functionalities via the **GUI menu** "View -> Graph specified vars -> Season Plot".
 
-Get the package from the gretl package server and install it:
-```
-pkg install season_plot
-```
+Please ask questions and report bugs on the gretl mailing list if possible. Alternatively, create an issue ticket on the github repo (see below).
+Source code and test script(s) can be found here:
+https://github.com/atecon/seasonal_plot
 
-Here is a sample script on how to use it (see also: https://raw.githubusercontent.com/atecon/seasonality_plot/master/src/season_plot_sample.inp):
+The package comprises the three public functions `set_season_plot()`, `plot_season_plot()` and `season_plot_gui()`. The `season_plot_gui()` function is mainly a wrapper for GUI access but may be also called via scripting as a "short-cut" way for immediately showing a plot on the screen.
 
-```
-clear
-set verbose off
-open denmark -q
-
-include season_plot.gfn
-
-open data9-13.gdt -p -q  # monthly frequency
-
-# prepare bundle object
-bundle b = set_season_plot(bkret)
-
-# Start plotting for the "obsmajor" (here year) frequency component
-plot_season_plot(b, "obsmajor", "display")
-```
-
-See that we've passed as the 2nd argument the string "obsmajor" which refers to the lowest frequency component (year) the monthly time-series data set. The resulting figure shows the dynamics of each month between the years 1990 and 1998:
-
-![sample](https://github.com/atecon/seasonality_plot/blob/master/plot1.png)
-
-Dependent on the frequency of the time-series, gretl distinguishes between the three fruency components "obsmajor" (typically 'year'), "obsminor" (typically 'month' or quarter) and obsmicro (typically 'day').
-
-The following command shows how the monthly component 'behaves' across different years
-
-```
-plot_season_plot(b, "obsminor", "display")
-```
-
-![sample](https://github.com/atecon/seasonality_plot/blob/master/plot2.png)
-
-# GUI access
-You can also call the functionalities via the GUI menu View -> Graph specified vars -> Season Plot".
-
-![sample](https://github.com/atecon/seasonality_plot/blob/master/gui.png)
-
+The `set_season_plot()` function sets all necessary information, runs some checks and computes the matrices holding the actual results. Information is stored in a bundle. The function `plot_season_plot()` calls this bundle and plots the requested result. Due to this two-step approach, the necessary computation has to be done only once.
 
 # Public functions
 
-The package comprises the three public functions set_season_plot(), plot_season_plot() and season_plot_gui(). The season_plot_gui() function is mainly a wrapper for GUI access but may be also called via scripting as a "short-cut" way for immediately showing a plot on the screen.
+```
+set_season_plot(const series y, const string name_y[null])
+```
 
-The set_season_plot() function sets all necessary information, runs some checks and computes the matrices holding the actual results. Informations is stored in a bundle. The function plot_season_plot() calls this bundle and plots the requested result. Due to this two-step approach, the necessary computation has to be done only once.
+Initializes various things, computes the pivoted matrices, and writes the gnuplot-files.
 
+## Parameters
 
-**Function**:       *set_season_plot(const series y, const string name_y[null])*
+- `y`: series, Variable of interest
+- `name_y`: string, Pass name of series 'y' (optional) -- only relevant for GUI wrapper and not for the user
 
-This function initializes various things and computes the pivoted matrices.
+## Returns
 
-Arguments:
-- ```y```:    series, Variable of interest
-- ```name_y```:    string, Pass name of series 'y' (optional) -- only relevant for GUI wrapper and not for the user.
+Bundle comprising the various items. You may be interested in the pivoted matrices stored under: `<BUNDLE_NAME>["data_to_plot"]`
 
-**Return**: *Bundle comprising the various items. You may be interested in the pivoted matrices stored under: <BUNDLE_NAME>["data_to_plot"]*
+---
 
+```
+plot_season_plot(const bundle self, const string type, string filename[null])
+```
 
-**Function**:       *plot_season_plot (const bundle self, const string type, string filename[null])*
+## Parameters
 
-This function calls the actual plotting facility.
+- `self`: bundle, Bundle returned by `set_season_plot()` function. The user may add variables parameters for fine-tuning the plot before passing it to the `plot_season_plot()` function (see below for details, optional)
+- `type`: string, String referring to the frequency component to show on the x-axis of the plot, either 'obsmajor', 'obsminor' 'obsmicro' or 'all' (for plotting all frequencies at once)
+- `filename`: string, Full path and file name for storing plot (optional; if not passed, plot is shown on screen)
 
-Arguments:
-- ```self```:		bundle, Bundle returned by set_season_plot() function. The
-	               	user may add variables parameters for fine-tuning the plot
-					before passing it to the plot_season_plot() function (see
-					below for details, optional)
-- ```type```:   	string, String referring to the frequency component to show
-	               	on the x-axis of the plot, either 'obsmajor', 'obsminor'
-	               	or 'obsmicro'.
-- ```filename```: 	string, Full path and file name for storing plot.
+## Returns
 
-**Return**: *No return value*
+No return value
 
+---
 
-**Function**:       *season_plot_gui (const series y, int frequency, const int PLOT_WIDTH, const int PLOT_HEIGHT, const int FONT_SIZE)*
+```
+season_plot_gui(const series y, int frequency, const int plot_width, const int plot_height, const int font_size)
+```
 
-This function is supposed to be for GUI access only.
+## Parameters
 
-Arguments:
-- ```y```	:		series, Variable of interest
-- ```frequency```:	int, Select frequency component, 1=obsmajor, 2=obsminor, 3=obsmicro (default 1)
-- ```PLOT_WIDTH```: int, control width of the plot (default 900)
-- ```PLOT_HEIGHT```: int, control height of the plot (default 600)
-- ```FONT_SIZE```:   int, control font size (default 12)
+- `y`: series, Variable of interest
+- `frequency`: int, Select frequency component, 1=obsmajor, 2=obsminor, 3=obsmicro (default 1)
+- `plot_width`: int, control width of the plot (default 900)
+- `plot_height`: int, control height of the plot (default 600)
+- `font_size`: int, control font size (default 12)
 
-**Return**: *No return value. Instant plot on screen.*
+## Returns
 
+No return value. Instant plot on screen.
 
-## Notes on frequency components
+# Notes on frequency components
 
-For details on frequency components, we refer to the gretl help. For instance check the help for the ```$obsmajor``` accessor (```help $obsmajor```). For most standard time-series frequencies, 'obsmajor' refers to the year, 'obsminor' to the quarter or month, and 'obsmicro' to the day of a month.
+For details on frequency components, we refer to the gretl help. For instance check the help for the `$obsmajor` accessor (`<help $obsmajor>`). For most standard time-series frequencies, 'obsmajor' refers to the year, 'obsminor' to the quarter or month, and 'obsmicro' to the day of a month.
 
 Things are different, when working with hourly data. In this case 'obsmajor' refers to the day and 'obsminor' to the hour ('obsmicro' is not defined for this frequency).
 
-Non-standard frequencies set manually with the ```setobs``` command may or may not work. In such cases please think in terms of major and minor frequency components and disregard the standard frequency labels in this package.
+Non-standard frequencies set manually with the 'setobs' command may or may not work. In such cases please think in terms of major and minor frequency components and disregard the standard frequency labels in this package.
 
-## The optional parameters for controlling multiplot output
+# Optional parameters for controlling plotting output
 
-The user can pass the following optional parameters before calling the function plot_seasonal_plot():
+The user can pass the following optional parameters before calling the function `plot_seasonal_plot()`:
 
-- PLOT_WIDTH:        int, Control width of the plot (default 900)
-- PLOT_HEIGHT:       int, Control height of the plot (default 600)
-- FONT_SIZE:         int, Control font site (default 12)
+- `plot_width`: int (default 900) Control width of the plot
+- `plot_height`: int (default 600) Control height of the plot
+- `font_size`: int (default 12) Control font size
+- `title`: string (default "") Control title of the plot
+- `cols`: int (default: automatically set) Control number of columns in the gridplot (only relevant of `type=all` is selected)
+- `rows`: int (default: automatically set) Control number of rows in the gridplot (only relevant of `type=all` is selected)
 
-# Tests
-The package includes unit-tests under <./tests/run_tests.inp>. Simply execute the shell-script <./run_tests.sh>.
+# Dependencies
+
+This package depends on the following user-contributed gretl packages:
+
+- `string_utils` (for string manipulation; used function `strdrop()`)
 
 # Changelog
-- v0.1, August 2020:
-    + initial release
+
+* **v0.2 (October 2024)**
+    * make use of gretl's built-in gridplot apparatus instead of using the "multiplot" package
+	* add new option to parameter `type` for plotting all frequencies at once (`type="all"`). This is useful for comparing the dynamics of all frequency components at once.
+	* add new parameter `title` for controlling the title of the plot
+	* add new parameter `cols` for controlling the number of columns in the gridplot (only relevant of `type=all` is selected)
+	* add new parameter `rows` for controlling the number of rows in the gridplot (only relevant of `type=all` is selected)
+	* rename parameters `plot_width` to `plot_width`, `plot_height` to `plot_height` and `font_size` to `font_size` (**backward incompatible**)
+	* raise minimum gretl version to 2024b (due to the use of the new gridplot apparatus and especially the `--title` option)
+
+* **v0.1 (August 2020)**
+    * Initial release
