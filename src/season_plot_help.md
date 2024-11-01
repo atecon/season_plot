@@ -100,7 +100,7 @@ This package depends on the following user-contributed gretl packages:
 	* add new parameter `title` for controlling the title of the plot
 	* add new parameter `cols` for controlling the number of columns in the gridplot (only relevant of `type=all` is selected)
 	* add new parameter `rows` for controlling the number of rows in the gridplot (only relevant of `type=all` is selected)
-	* rename parameters `plot_width` to `plot_width`, `plot_height` to `plot_height` and `font_size` to `font_size` (**backward incompatible**)
+	* rename parameters `PLOT_WIDTH` to `plot_width`, `PLOT_HEIGHT` to `plot_height` and `FONT_SIZE` to `font_size` (**backward incompatible**)
 	* raise minimum gretl version to 2024b (due to the use of the new gridplot apparatus and especially the `--title` option)
 
 * **v0.1 (August 2020)**
