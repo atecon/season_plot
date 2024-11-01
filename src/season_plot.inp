@@ -46,15 +46,10 @@ function bundle set_season_plot (const series y,
     string self.name_y = (exists(name_y) ? name_y : argname(y))
 
     flag_frequency_components(y, &self)
-
     list self.frequency_series = get_frequency_series(&self)
-
     get_frequency_strings(&self)
-
     group_y_by_frequencies(y, &self)
-
     do_pivoting(y, &self)
-
     compile_subplots(&self)
 
     return self
@@ -302,7 +297,7 @@ end function
 
 
 function void compile_subplots (bundle *self)
-    /* Compile all combinations of plots and store gp-file names */
+    /* Compile all combinations of plots, store these as gp-files and save the file names. */
 
     scalar n_combinations = nelem(getkeys(self.data_to_plot))
     strings sublot_combs = sublot_order()
@@ -315,7 +310,7 @@ function void compile_subplots (bundle *self)
         if inbundle(self.data_to_plot, @matname)
             # a matrix with a single row cannot be drawn
             if rows(self.data_to_plot[matname]) > 1
-                self.gp_filenames = self.gp_filenames + sprintf("seasplot_%s.gp", sublot_combs[i])
+                self.gp_filenames += sprintf("%s/seasplot_%s.gp", $dotdir, sublot_combs[i])
 
                 seasplot(matname, counter, self)
                 counter++
@@ -332,11 +327,13 @@ end function
 function void seasplot (const string matname,
                         const int gpfile_id,
                         const bundle self)
-    /* Execute actual plotting. */
+    /* Execute actual plotting. Create the "gpfile_id"-th figure. */
 
     string filename = self.gp_filenames[gpfile_id]
     matrix m = self.data_to_plot[matname]
     strings cnames = cnameget(m)
+
+    # TODO: Allow for more options for tweaking the plot
 
     plot m
         options with-lp fit=none
