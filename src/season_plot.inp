@@ -63,7 +63,6 @@ function void plot_season_plot (const bundle self,
 
     string filename = (exists(filename)) ? filename : "display"
     strings to_be_plotted = array(0)
-    strings gp_filenames = self.gp_filenames
 
     bundle plot_opts = get_plot_opts_from_self(self)
 
@@ -74,7 +73,7 @@ function void plot_season_plot (const bundle self,
         errorif(instring(type, "micro"), "Data set has not 'obsmicro' frequency component.")
     endif
 
-    loop foreach i gp_filenames
+    loop foreach i self.gp_filenames
         if instring("$i", sprintf("%s_by", type))
             to_be_plotted = to_be_plotted + "$i"
         endif
