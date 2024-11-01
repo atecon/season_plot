@@ -30,7 +30,7 @@ function bundle set_season_plot (const series y,
     smpl y --contiguous
 
     # Initializations
-    bundle self = null
+    bundle self = _()
     string self.name_y = (exists(name_y) ? name_y : argname(y))
 
     flag_frequency_components(y, &self)
@@ -99,9 +99,8 @@ end function
 function void check_type (const string type)
     /* Check if type is one of the allowed types. */
 
-    errorif(!instrings(get_supported_types(), type),
-            sprintf("Invalid frequency component: %s.", type))
-            #TODO: sprintf("Invalid frequency component: %s. Allowed types are: %s", type, get_supported_types()))
+    errorif(!instrings(get_supported_types(), type, TRUE),
+            sprintf("Invalid frequency component: %s. Allowed types are: '%s'", type, flatten(get_supported_types(), ", ")))
 end function
 
 
@@ -136,7 +135,7 @@ end function
 function bundle get_plot_opts_from_self (const bundle self)
     /* Put passed parameters for multiplot() function into a separate bundle. */
 
-    bundle B = null
+    bundle B = _()
     strings valid_keys = getkeys(multiplot_settings())
 
     loop foreach i valid_keys
@@ -152,7 +151,7 @@ end function
 function bundle multiplot_settings (void)
     /* Settings for gridplot command. */
 
-    bundle opts = null
+    bundle opts = _()
     scalar opts.plot_width = 900
     scalar opts.plot_height = 600
     scalar opts.font_size = 12
@@ -167,7 +166,7 @@ end function
 function void do_pivoting (const series y, bundle *self)
     /* Wrapper for calling the actual pivoting steps. */
 
-    bundle self.data_to_plot = null
+    bundle self.data_to_plot = _()
     strings cases = getkeys(self.y_grouped_by_frequency)
 
     loop foreach i cases
@@ -252,7 +251,7 @@ function void group_y_by_frequencies (const series y,
                                       bundle *self)
     /* Wrapper for grouping y by frequencies dependent on data set. */
 
-    bundle self.y_grouped_by_frequency = null
+    bundle self.y_grouped_by_frequency = _()
 
     if self.frequency_components.obsmicro == FALSE
         group_y_by_freq_no_obsmicro(y, &self)
@@ -399,7 +398,7 @@ end function
 function list get_frequency_series (bundle *self)
     /* Retrieve up to 3 frequency series. */
 
-    list L = null
+    list L = empty
     strings keys = getkeys(self.frequency_components)
 
     loop foreach i keys
