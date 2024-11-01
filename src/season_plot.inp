@@ -33,10 +33,9 @@ end function
 
 
 function bundle set_season_plot (const series y,
-                                const string name_y[null] "Only for GUI access")
+                                 const string name_y[null] "Only for GUI access")
     /*  Compile matrices holding grouped data for plotting. */
 
-    errorif($datatype != 2, "Time-series data set needed.")
     errorif($pd == 1, "Time-series has no seasonal frequency.")
     check_multiplot_version()
 
