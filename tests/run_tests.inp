@@ -4,7 +4,6 @@ clear
 
 include assertion.gfn
 include string_utils.gfn
-include multiplot.gfn
 
 include ./src/season_plot.inp
 
@@ -14,7 +13,6 @@ check_type("obsmicro")
 check_type("all")
 catch check_type("foo")
 assert($error != FALSE)
-
 
 open jgm-data.gdt -q -p
 function void test_flag_frequency_comps_an (const series y)
