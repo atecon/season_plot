@@ -1,21 +1,18 @@
 function void season_plot_gui (const series y,
-                               int Frequency[1:3:1] "Freq. to _show on x-axis" {"major (usually year)", "minor (usually Q or M)", "micro (usually day)"},
-                               const int PLOT_WIDTH[600::900] "Width of plot",
-                               const int PLOT_HEIGHT[400::600] "Height of plot",
-                               const int FONT_SIZE[6::12] "Font size")
+                               int Frequency[1:4:1] "Freq. to _show on x-axis" {"major (usually year)", "minor (usually Q or M)", "micro (usually day)", "all"},
+                               const int plot_width[::900] "Width of plot",
+                               const int plot_height[::600] "Height of plot",
+                               const int font_size[2::12] "Font size")
     /* Helper function for GUI access. */
 
-    bundle opts = defbundle(\
-                "PLOT_WIDTH", PLOT_WIDTH,\
-                "PLOT_HEIGHT", PLOT_HEIGHT,\
-                "FONT_SIZE", FONT_SIZE)
+    bundle opts = _(plot_width,
+                    plot_height,
+                    font_size)
 
-    if Frequency == 1
-        string type = "obsmajor"
-    elif Frequency == 2
-        string type = "obsminor"
-    elif Frequency == 3
-        string type = "obsmicro"
+    if Frequency <= 3
+        string type = get_supported_types()[Frequency]
+    else
+        string type = "all"
     endif
 
     bundle B = set_season_plot(y, argname(y)) + opts
@@ -24,20 +21,11 @@ function void season_plot_gui (const series y,
 end function
 
 
-function void check_multiplot_version (void)
-    /* */
-
-    pkg query multiplot --quiet
-    errorif($result.version < 0.2, "Update the multiplot package to version 0.2, please.")
-end function
-
-
 function bundle set_season_plot (const series y,
                                  const string name_y[null] "Only for GUI access")
-    /*  Compile matrices holding grouped data for plotting. */
+    /*  Compile matrices holding grouped data for plotting, and write the gnuplot-files. */
 
     errorif($pd == 1, "Time-series has no seasonal frequency.")
-    check_multiplot_version()
 
     smpl y --contiguous
 
@@ -61,25 +49,87 @@ function void plot_season_plot (const bundle self,
                                 string filename[null])
     /* Do actualy plotting. User selects which frequency component to put on the x-axis. */
 
-    string filename = (exists(filename)) ? filename : "display"
-    strings to_be_plotted = array(0)
-
-    bundle plot_opts = get_plot_opts_from_self(self)
-
-    bundle plot_opts = (exists(plot_opts)) ? plot_opts : null
-    bundle plot_opts = plot_opts + multiplot_settings()
-
     if self.frequency_components.obsmicro == FALSE
-        errorif(instring(type, "micro"), "Data set has not 'obsmicro' frequency component.")
+        errorif(instring(type, "micro"), "Data set has no 'obsmicro' frequency component.")
     endif
+    check_type(type)
+
+    string filename = exists(filename) ? filename : "display"
+    bundle plot_opts = get_plot_opts_from_self(self)
+    bundle plot_opts = plot_opts + multiplot_settings()
+    string plot_opts_string = get_plot_opts_string(plot_opts)
+
+    if type == "all"
+        plot_all(self, filename, plot_opts_string)
+    else
+        plot_single(self, type, filename, plot_opts_string)
+    endif
+end function
+
+
+function string get_plot_opts_string (const bundle B)
+    /* Convert bundle items referring to gridplot options into string which can be used
+       for the gridplot command. */
+
+    string s = ""
+
+    s += sprintf("--fontsize=%d ", B.font_size)
+    s += sprintf("--width=%g ", B.plot_width)
+    s += sprintf("--height=%g ", B.plot_height)
+    if B.title != ""
+        s += sprintf("--title=\"%s\" ", B.title)
+    endif
+    if ok(B.rows)
+        s += sprintf("--rows=%d ", B.rows)
+    endif
+    if ok(B.cols)
+        s += sprintf("--cols=%d ", B.cols)
+    endif
+
+    return s
+end function
+
+function strings get_supported_types (void)
+    /* Return the supported frequency components. */
+
+    strings supported_types = defarray("obsmajor", "obsminor", "obsmicro", "all")
+    return supported_types
+end function
+
+function void check_type (const string type)
+    /* Check if type is one of the allowed types. */
+
+    errorif(!instrings(get_supported_types(), type),
+            sprintf("Invalid frequency component: %s.", type))
+            #TODO: sprintf("Invalid frequency component: %s. Allowed types are: %s", type, get_supported_types()))
+end function
+
+
+function void plot_all (const bundle self,
+                        const string filename,
+                        const string plot_opts)
+    /* Plot all plots on single canvas. */
+
+    strings F = self.gp_filenames
+    gridplot F --output="@filename" @plot_opts
+end function
+
+
+function void plot_single (const bundle self,
+                           const string type,
+                           const string filename,
+                           const string plot_opts)
+    /* Create for each plot an own canvas. */
+
+    strings to_be_plotted = array(0)
 
     loop foreach i self.gp_filenames
         if instring("$i", sprintf("%s_by", type))
-            to_be_plotted = to_be_plotted + "$i"
+            to_be_plotted += "$i"
         endif
     endloop
 
-    multiplot(to_be_plotted, filename, nelem(to_be_plotted), 1, plot_opts)
+    gridplot to_be_plotted --output="@filename" @plot_opts
 end function
 
 
@@ -100,12 +150,15 @@ end function
 
 
 function bundle multiplot_settings (void)
-    /* Settings for multiplot. */
+    /* Settings for gridplot command. */
 
     bundle opts = null
-    scalar opts.PLOT_WIDTH = 900
-    scalar opts.PLOT_HEIGHT = 600
-    scalar opts.FONT_SIZE = 12
+    scalar opts.plot_width = 900
+    scalar opts.plot_height = 600
+    scalar opts.font_size = 12
+    string opts.title = ""  # refers to the global title
+    scalar opts.rows = NA
+    scalar opts.cols = NA
 
     return opts
 end function
@@ -269,9 +322,9 @@ end function
 function matrix drop_count_column (matrix m)
     /* Drop "count" column. */
 
-    cnames_old = cnameget(m)
+    strings cnames_old = cnameget(m)
     scalar pos = instrings(cnames_old, "count")     # breaks of no 'count' col exists
-    cnames_new = strdrop(cnames_old, "count")
+    cnames_new = strdrop(cnames_old, "count")       # from "string_utils" package
 
     m = m[,-pos]
     cnameset(m, cnames_new)
@@ -332,7 +385,7 @@ function void seasplot (const string matname,
     matrix m = self.data_to_plot[matname]
     strings cnames = cnameget(m)
 
-    # TODO: Allow for more options for tweaking the plot
+    # TODO: Allow for more options for tweaking the plot later
 
     plot m
         options with-lp fit=none
@@ -364,10 +417,9 @@ function void flag_frequency_components (const series y,
                                         bundle *self)
     /* Set flags for the 3 separate frequency components. */
 
-    bundle self.frequency_components = defbundle(\
-                                    "obsmajor", FALSE,\
-                                    "obsminor", FALSE,\
-                                    "obsmicro", FALSE)
+    bundle self.frequency_components = _(obsmajor = FALSE,
+                                         obsminor = FALSE,
+                                         obsmicro = FALSE)
 
     if $pd > 1
         self.frequency_components.obsmajor = TRUE
