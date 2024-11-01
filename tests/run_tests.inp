@@ -1,11 +1,19 @@
 set verbose off
+set assert stop
 clear
 
 include assertion.gfn
 include string_utils.gfn
 include multiplot.gfn
 
-include "./src/season_plot.inp" --force
+include ./src/season_plot.inp
+
+check_type("obsmajor")
+check_type("obsminor")
+check_type("obsmicro")
+check_type("all")
+catch check_type("foo")
+assert($error != FALSE)
 
 
 open jgm-data.gdt -q -p
@@ -185,12 +193,12 @@ function void test_multiplot_settings (void)
 
     bundle B = multiplot_settings()
 
-    assert_equal_num(nelem(B), 3)
-    assert_equal_num(B.PLOT_WIDTH, 900)
-    assert_equal_num(B.PLOT_HEIGHT, 600)
-    assert_equal_num(B.FONT_SIZE, 12)
+    assert_equal_num(B.plot_width, 900)
+    assert_equal_num(B.plot_height, 600)
+    assert_equal_num(B.font_size, 12)
 end function
 test_multiplot_settings()
+
 
 function void test_sublot_order (void)
     print "Start testing sublot_order()"
@@ -386,11 +394,11 @@ function void test_get_plot_opts_from_self (void)
     bundle R = get_plot_opts_from_self(B)
     assert_equal_num(nelem(R), 0)
 
-    bundle B = defbundle("FONT_SIZE", 5)
+    bundle B = defbundle("font_size", 5)
     bundle R = get_plot_opts_from_self(B)
     assert_equal_num(nelem(R), 1)
 
-    assert_equal_num(B.FONT_SIZE, 5)
+    assert_equal_num(B.font_size, 5)
 end function
 test_get_plot_opts_from_self()
 
@@ -420,6 +428,9 @@ function void test_plot_season_plot (void)
     print "PASS"        # tricky to test
 end function
 test_plot_season_plot()
+
+
+
 
 
 printf "\nInfo: All tests passed.\n"
