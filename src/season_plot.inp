@@ -17,7 +17,7 @@ function void season_plot_gui (const series y,
 
     bundle B = set_season_plot(y, argname(y)) + opts
 
-    plot_season_plot(B, type, "display")
+    do_season_plot(B, type, "display")
 end function
 
 
@@ -44,9 +44,9 @@ function bundle set_season_plot (const series y,
 end function
 
 
-function void plot_season_plot (const bundle self,
-                                const string type "Freq. to show on x-axis",
-                                string filename[null])
+function void do_season_plot (const bundle self,
+                              const string type "Freq. to show on x-axis",
+                              string filename[null])
     /* Do actualy plotting. User selects which frequency component to put on the x-axis. */
 
     if self.frequency_components.obsmicro == FALSE
@@ -73,17 +73,17 @@ function string get_plot_opts_string (const bundle B)
 
     string s = ""
 
-    s += sprintf("--fontsize=%d ", B.font_size)
-    s += sprintf("--width=%g ", B.plot_width)
-    s += sprintf("--height=%g ", B.plot_height)
+    s += sprintf("--fontsize=%d ", int(B.font_size))
+    s += sprintf("--width=%d ", int(B.plot_width))
+    s += sprintf("--height=%d ", int(B.plot_height))
     if B.title != ""
         s += sprintf("--title=\"%s\" ", B.title)
     endif
     if ok(B.rows)
-        s += sprintf("--rows=%d ", B.rows)
+        s += sprintf("--rows=%d ", int(B.rows))
     endif
     if ok(B.cols)
-        s += sprintf("--cols=%d ", B.cols)
+        s += sprintf("--cols=%d ", int(B.cols))
     endif
 
     return s
