@@ -61,7 +61,7 @@ season_plot_gui(const series y, int frequency, const int plot_width, const int p
 
 ## Note
 
-This function is
+This function is mainly a wrapper for GUI access but may be also called via scripting as a "short-cut" way for immediately showing a plot on the screen.
 
 ## Parameters
 
@@ -87,9 +87,9 @@ Non-standard frequencies set manually with the 'setobs' command may or may not w
 
 The user can pass the following optional parameters before calling the function `plot_seasonal_plot()`:
 
-- `plot_width`: int (default 900) Control width of the plot (must be of integer  type)
-- `plot_height`: int (default 600) Control height of the plot (must be of integer  type)
-- `font_size`: int (default 12) Control font size (must be of integer  type)
+- `plot_width`: int (default 900) Control width of the plot
+- `plot_height`: int (default 600) Control height of the plot
+- `font_size`: int (default 12) Control font size
 - `title`: string (default "") Control title of the plot
 - `cols`: int (default: automatically set) Control number of columns in the gridplot (only relevant of `type=all` is selected)
 - `rows`: int (default: automatically set) Control number of rows in the gridplot (only relevant of `type=all` is selected)
@@ -102,7 +102,7 @@ This package depends on the following user-contributed gretl packages:
 
 # Changelog
 
-* **v0.2 (October 2024)**
+* **v0.2 (November 2024)**
     * make use of gretl's built-in gridplot apparatus instead of using the "multiplot" package
 	* rename function `plot_season_plot()` to `do_season_plot()` (**backward incompatible**)
 	* rename parameters `PLOT_WIDTH` to `plot_width`, `PLOT_HEIGHT` to `plot_height` and `FONT_SIZE` to `font_size` (**backward incompatible**)
