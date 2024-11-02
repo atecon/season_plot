@@ -27,26 +27,24 @@ endif
 # prepare everyting
 bundle b = set_season_plot(y)
 
-
 # Start plotting for difference frequency components
-plot_season_plot(b, "obsmajor")
-plot_season_plot(b, "obsminor")
+do_season_plot(b, "obsmajor")
+do_season_plot(b, "obsminor")
 if max($pd .= {5,6,7})
-    plot_season_plot(b, "obsmicro")
+    do_season_plot(b, "obsmicro")
 endif
 
 if run_example == 1
     # Gridplot with all components and store it
-    plot_season_plot(b, "all", "season_plot_all.png")
+    do_season_plot(b, "all", "season_plot_all.png")
 endif
-
 
 # Optional: Example on how to configure multiplot font size
 # Fine tune plot by controlling parameters
 scalar b.plot_width = 900
 scalar b.font_size = 8
 string b.title = "Seasonal plot with small font size"
-plot_season_plot(b, "obsmajor", "season_plot_obsmajor_small_font.png")
+do_season_plot(b, "obsmajor", "season_plot_obsmajor_small_font.png")
 
 
 # You may want to look at the pivoted matrices
