@@ -102,7 +102,7 @@ This package depends on the following user-contributed gretl packages:
 
 # Changelog
 
-* **v0.2 (October 2024)**
+* **v0.2 (November 2024)**
     * make use of gretl's built-in gridplot apparatus instead of using the "multiplot" package
 	* rename function `plot_season_plot()` to `do_season_plot()` (**backward incompatible**)
 	* rename parameters `PLOT_WIDTH` to `plot_width`, `PLOT_HEIGHT` to `plot_height` and `FONT_SIZE` to `font_size` (**backward incompatible**)
