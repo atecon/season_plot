@@ -36,7 +36,7 @@ Bundle comprising the various items. You may be interested in the pivoted matric
 ---
 
 ```
-plot_season_plot(const bundle self, const string type, string filename[null])
+do_season_plot(const bundle self, const string type, string filename[null])
 ```
 
 ## Parameters
@@ -49,11 +49,19 @@ plot_season_plot(const bundle self, const string type, string filename[null])
 
 No return value
 
+## Hint
+
+When calling `type="all"`, the user may also want to change the size of the plot. This can be done by passing the optional parameters `plot_width`, `plot_height` and `font_size` to the `do_season_plot()` function via the bundle `self`.
 ---
+
 
 ```
 season_plot_gui(const series y, int frequency, const int plot_width, const int plot_height, const int font_size)
 ```
+
+## Note
+
+This function is
 
 ## Parameters
 
@@ -79,9 +87,9 @@ Non-standard frequencies set manually with the 'setobs' command may or may not w
 
 The user can pass the following optional parameters before calling the function `plot_seasonal_plot()`:
 
-- `plot_width`: int (default 900) Control width of the plot
-- `plot_height`: int (default 600) Control height of the plot
-- `font_size`: int (default 12) Control font size
+- `plot_width`: int (default 900) Control width of the plot (must be of integer  type)
+- `plot_height`: int (default 600) Control height of the plot (must be of integer  type)
+- `font_size`: int (default 12) Control font size (must be of integer  type)
 - `title`: string (default "") Control title of the plot
 - `cols`: int (default: automatically set) Control number of columns in the gridplot (only relevant of `type=all` is selected)
 - `rows`: int (default: automatically set) Control number of rows in the gridplot (only relevant of `type=all` is selected)
@@ -96,11 +104,12 @@ This package depends on the following user-contributed gretl packages:
 
 * **v0.2 (October 2024)**
     * make use of gretl's built-in gridplot apparatus instead of using the "multiplot" package
-	* add new option to parameter `type` for plotting all frequencies at once (`type="all"`). This is useful for comparing the dynamics of all frequency components at once.
+	* rename function `plot_season_plot()` to `do_season_plot()` (**backward incompatible**)
+	* rename parameters `PLOT_WIDTH` to `plot_width`, `PLOT_HEIGHT` to `plot_height` and `FONT_SIZE` to `font_size` (**backward incompatible**)
+	* add new option to parameter `type` for plotting all frequencies at once (`type="all"`). This is useful for comparing the dynamics of all frequency components at once
 	* add new parameter `title` for controlling the title of the plot
 	* add new parameter `cols` for controlling the number of columns in the gridplot (only relevant of `type=all` is selected)
 	* add new parameter `rows` for controlling the number of rows in the gridplot (only relevant of `type=all` is selected)
-	* rename parameters `PLOT_WIDTH` to `plot_width`, `PLOT_HEIGHT` to `plot_height` and `FONT_SIZE` to `font_size` (**backward incompatible**)
 	* raise minimum gretl version to 2024b (due to the use of the new gridplot apparatus and especially the `--title` option)
 
 * **v0.1 (August 2020)**
