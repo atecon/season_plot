@@ -421,11 +421,11 @@ function void test_seasplot (void)
 end function
 test_seasplot()
 
-function void test_plot_season_plot (void)
-    print "Start testing plot_season_plot()"
+function void test_do_season_plot (void)
+    print "Start testing do_season_plot()"
     print "PASS"        # tricky to test
 end function
-test_plot_season_plot()
+test_do_season_plot()
 
 
 
