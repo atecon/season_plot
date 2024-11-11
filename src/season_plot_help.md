@@ -4,8 +4,6 @@ Plot seasonal components of a time-series by frequency groups.
 
 This package computes and depicts a time-series across sub-periods, also called a Buys-Ballot plot. For instance, if one has a quarterly time-series one can plot the dynamics of each quarter across years. Vice versa, you may also be interested in plotting the dynamics of each year's quarter.
 
-Note, you may also try the user-written gretl package "buys_ballot" written by Ignacio Diaz-Emparanza and Riccardo (Jack) Lucchetti. It essentially shares similar features but does not support all frequency combinations.
-
 You can also call the functionalities via the **GUI menu** "View -> Graph specified vars -> Season Plot".
 
 Please ask questions and report bugs on the gretl mailing list if possible. Alternatively, create an issue ticket on the github repo (see below).
@@ -93,6 +91,8 @@ The user can pass the following optional parameters before calling the function 
 - `title`: string (default "") Control title of the plot
 - `cols`: int (default: automatically set) Control number of columns in the gridplot (only relevant of `type=all` is selected)
 - `rows`: int (default: automatically set) Control number of rows in the gridplot (only relevant of `type=all` is selected)
+- `pointsize`: scalar (default 1) Control size of points (switch off by setting to 0)
+
 
 # Dependencies
 
@@ -102,6 +102,10 @@ This package depends on the following user-contributed gretl packages:
 
 # Changelog
 
+* **v0.3 (November 2024)**
+	* add new parameter `pointsize` for controlling the size of points in the plot
+	* Internal refactoring and code cleanup
+
 * **v0.2 (November 2024)**
     * make use of gretl's built-in gridplot apparatus instead of using the "multiplot" package
 	* rename function `plot_season_plot()` to `do_season_plot()` (**backward incompatible**)
@@ -110,7 +114,7 @@ This package depends on the following user-contributed gretl packages:
 	* add new parameter `title` for controlling the title of the plot
 	* add new parameter `cols` for controlling the number of columns in the gridplot (only relevant of `type=all` is selected)
 	* add new parameter `rows` for controlling the number of rows in the gridplot (only relevant of `type=all` is selected)
-	* raise minimum gretl version to 2024b (due to the use of the new gridplot apparatus and especially the `--title` option)
+1	* raise minimum gretl version to 2024b (due to the use of the new gridplot apparatus and especially the `--title` option)
 
 * **v0.1 (August 2020)**
     * Initial release

@@ -38,13 +38,12 @@ function bundle set_season_plot (const series y,
     get_frequency_strings(&self)
     group_y_by_frequencies(y, &self)
     do_pivoting(y, &self)
-    compile_subplots(&self)
 
     return self
 end function
 
 
-function void do_season_plot (const bundle self,
+function void do_season_plot (bundle self,
                               const string type "Freq. to show on x-axis",
                               string filename[null])
     /* Do actualy plotting. User selects which frequency component to put on the x-axis. */
@@ -55,22 +54,22 @@ function void do_season_plot (const bundle self,
     check_type(type)
 
     string filename = exists(filename) ? filename : "display"
-    bundle plot_opts = get_plot_opts_from_self(self)
-    bundle plot_opts = plot_opts + multiplot_settings()
-    string plot_opts_string = get_plot_opts_string(plot_opts)
+    compile_subplots(&self)
 
     if type == "all"
-        plot_all(self, filename, plot_opts_string)
+        plot_all(self, filename)
     else
-        plot_single(self, type, filename, plot_opts_string)
+        plot_single(self, type, filename)
     endif
 end function
 
 
-function string get_plot_opts_string (const bundle B)
+function string get_plot_opts_string (const bundle self)
     /* Convert bundle items referring to gridplot options into string which can be used
        for the gridplot command. */
 
+    bundle plot_opts = get_plot_opts_from_self(self)
+    bundle B = plot_opts + multiplot_settings()
     string s = ""
 
     s += sprintf("--fontsize=%d ", int(B.font_size))
@@ -105,10 +104,10 @@ end function
 
 
 function void plot_all (const bundle self,
-                        const string filename,
-                        const string plot_opts)
+                        const string filename)
     /* Plot all plots on single canvas. */
 
+    string plot_opts = get_plot_opts_string(self)
     strings F = self.gp_filenames
     gridplot F --output="@filename" @plot_opts
 end function
@@ -116,10 +115,10 @@ end function
 
 function void plot_single (const bundle self,
                            const string type,
-                           const string filename,
-                           const string plot_opts)
+                           const string filename)
     /* Create for each plot an own canvas. */
 
+    string plot_opts = get_plot_opts_string(self)
     strings to_be_plotted = array(0)
 
     loop foreach i self.gp_filenames
@@ -158,6 +157,7 @@ function bundle multiplot_settings (void)
     string opts.title = ""  # refers to the global title
     scalar opts.rows = NA
     scalar opts.cols = NA
+    scalar opts.pointsize = 1
 
     return opts
 end function
@@ -361,9 +361,9 @@ function void compile_subplots (bundle *self)
         if inbundle(self.data_to_plot, @matname)
             # a matrix with a single row cannot be drawn
             if rows(self.data_to_plot[matname]) > 1
+                # TODO: Later think about writing the ouput to a buffer (string array) instead of a file
                 self.gp_filenames += sprintf("%s/seasplot_%s.gp", $dotdir, sublot_combs[i])
-
-                seasplot(matname, counter, self)
+                seasplot(matname, self.gp_filenames[counter], self)
                 counter++
             endif
         endif
@@ -376,21 +376,21 @@ end function
 
 
 function void seasplot (const string matname,
-                        const int gpfile_id,
+                        const string filename,
                         const bundle self)
     /* Execute actual plotting. Create the "gpfile_id"-th figure. */
 
-    string filename = self.gp_filenames[gpfile_id]
     matrix m = self.data_to_plot[matname]
     strings cnames = cnameget(m)
-
-    # TODO: Allow for more options for tweaking the plot later
+    bundle plotops = multiplot_settings()
+    scalar pointsize = exists(self.pointsize) ? self.pointsize : plotops.pointsize
 
     plot m
-        options with-lp fit=none
+        options fit=none with-lp
         printf "set xlabel '%s'", self.frequency_strings[cnames[nelem(cnames)]]
         printf "set ylabel '%s'", self.name_y
         literal set grid
+        printf "set for [i=1:40] linetype i ps %d", pointsize
     end plot --output="@filename"
 end function
 
