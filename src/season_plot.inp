@@ -157,7 +157,7 @@ function bundle multiplot_settings (void)
     string opts.title = ""  # refers to the global title
     scalar opts.rows = NA
     scalar opts.cols = NA
-    scalar opts.pointsize = 1
+    scalar opts.point_size = 1
 
     return opts
 end function
@@ -383,14 +383,14 @@ function void seasplot (const string matname,
     matrix m = self.data_to_plot[matname]
     strings cnames = cnameget(m)
     bundle plotops = multiplot_settings()
-    scalar pointsize = exists(self.pointsize) ? self.pointsize : plotops.pointsize
+    scalar point_size = exists(self.point_size) ? self.point_size : plotops.point_size
 
     plot m
         options fit=none with-lp
         printf "set xlabel '%s'", self.frequency_strings[cnames[nelem(cnames)]]
         printf "set ylabel '%s'", self.name_y
         literal set grid
-        printf "set for [i=1:40] linetype i ps %d", pointsize
+        printf "set for [i=1:40] linetype i ps %d", point_size
     end plot --output="@filename"
 end function
 

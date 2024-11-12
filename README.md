@@ -91,7 +91,7 @@ The user can pass the following optional parameters before calling the function 
 - `title`: string (default "") Control title of the plot
 - `cols`: int (default: automatically set) Control number of columns in the gridplot (only relevant of `type=all` is selected)
 - `rows`: int (default: automatically set) Control number of rows in the gridplot (only relevant of `type=all` is selected)
-- `pointsize`: scalar (default 1) Control size of points (switch off by setting to 0)
+- `point_size`: scalar (default 1) Control size of points (switch off by setting to 0)
 
 
 # Dependencies
@@ -103,7 +103,7 @@ This package depends on the following user-contributed gretl packages:
 # Changelog
 
 * **v0.3 (November 2024)**
-	* add new parameter `pointsize` for controlling the size of points in the plot
+	* add new parameter `point_size` for controlling the size of points in the plot
 	* Internal refactoring and code cleanup
 
 * **v0.2 (November 2024)**

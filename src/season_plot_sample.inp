@@ -28,8 +28,8 @@ endif
 bundle b = set_season_plot(y)
 # Start plotting for difference frequency components
 do_season_plot(b, "obsmajor")
-# change pointsizes
-scalar b.pointsize = 2
+# change point_sizes
+scalar b.point_size = 2
 do_season_plot(b, "obsminor")
 if max($pd .= {5,6,7})
     do_season_plot(b, "obsmicro")
