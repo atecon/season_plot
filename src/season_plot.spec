@@ -1,8 +1,8 @@
 author = Artur Tarassow
 email = atecon@posteo.de
 version = 0.3
-date = 2024-11-11
-description = Plot seasonal (buys-ballot) time-series components
+date = 2024-11-12
+description = Plot seasonal (Buys-Ballot) time-series components
 tags = C22
 min-version = 2024b
 public = set_season_plot do_season_plot season_plot_gui
