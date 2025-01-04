@@ -11,15 +11,15 @@ include season_plot.gfn
 scalar run_example = 1
 
 if run_example == 1
-    open data9-13.gdt -p -q  # monthly
+    open data9-13.gdt --preserve --quiet  # monthly
     series y = bkret
 
 elif run_example == 2
-    open AWM18.gdt -p -q     # quarterly
+    open AWM18.gdt --preserve --quiet     # quarterly
     series y = ldiff(HICP)
 
 elif run_example == 3
-    open djclose.gdt -q -p
+    open djclose.gdt --preserve --quiet
     series y = djclose       # 5 days business week
 endif
 
