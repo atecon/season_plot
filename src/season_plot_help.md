@@ -8,7 +8,7 @@ You can also call the functionalities via the **GUI menu** "View -> Graph specif
 
 Please ask questions and report bugs on the gretl mailing list if possible. Alternatively, create an issue ticket on the github repo (see below).
 Source code and test script(s) can be found here:
-https://github.com/atecon/seasonal_plot
+https://github.com/atecon/season_plot
 
 The package comprises the three public functions `set_season_plot()`, `plot_season_plot()` and `season_plot_gui()`. The `season_plot_gui()` function is mainly a wrapper for GUI access but may be also called via scripting as a "short-cut" way for immediately showing a plot on the screen.
 
