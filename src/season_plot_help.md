@@ -16,7 +16,6 @@ The `set_season_plot()` function sets all necessary information, runs some check
 
 # Public functions
 
-## set_season_plot()
 ```
 set_season_plot(series y)
 ```
@@ -27,14 +26,12 @@ Initializes various things, computes the pivoted matrices, and writes the gnuplo
 
 - `y`: series, Variable of interest
 
-*Note for Pros*: The function accepts as a second optional parameter the name of the series 'y'. Internally used for the GUI wrapper only.
+*Note for Pros*: The function accepts as a second optional parameter the name of series 'y'. Internally used for the GUI wrapper only.
 
 ## Returns
 
 Bundle comprising the various items. You may be interested in the pivoted matrices stored under: `<BUNDLE_NAME>["data_to_plot"]`
 
-
-## do_season_plot()
 
 ```
 do_season_plot(bundle self, string type, string filename[null])
@@ -55,8 +52,6 @@ No return value
 
 When calling `type="all"`, the user may also want to change the size of the plot. This can be done by passing the optional parameters `plot_width`, `plot_height` and `font_size` to the `do_season_plot()` function via the bundle `self`.
 
-
-## season_plot_gui()
 
 ```
 season_plot_gui(series y, int frequency, int plot_width, int plot_height, int font_size)
