@@ -17,7 +17,7 @@ The `set_season_plot()` function sets all necessary information, runs some check
 # Public functions
 
 ```
-set_season_plot(const series y, const string name_y[null])
+set_season_plot(series y)
 ```
 
 Initializes various things, computes the pivoted matrices, and writes the gnuplot-files.
@@ -25,7 +25,8 @@ Initializes various things, computes the pivoted matrices, and writes the gnuplo
 ## Parameters
 
 - `y`: series, Variable of interest
-- `name_y`: string, Pass name of series 'y' (optional) -- only relevant for GUI wrapper and not for the user
+
+*Note for Pros*: The function accepts as a second optional parameter the name of the series 'y'. Internally used for the GUI wrapper only.
 
 ## Returns
 
@@ -34,7 +35,7 @@ Bundle comprising the various items. You may be interested in the pivoted matric
 ---
 
 ```
-do_season_plot(const bundle self, const string type, string filename[null])
+do_season_plot(bundle self, string type, string filename[null])
 ```
 
 ## Parameters
@@ -54,7 +55,7 @@ When calling `type="all"`, the user may also want to change the size of the plot
 
 
 ```
-season_plot_gui(const series y, int frequency, const int plot_width, const int plot_height, const int font_size)
+season_plot_gui(series y, int frequency, int plot_width, int plot_height, int font_size)
 ```
 
 ## Note
@@ -89,8 +90,8 @@ The user can pass the following optional parameters before calling the function 
 - `plot_height`: int (default 600) Control height of the plot
 - `font_size`: int (default 12) Control font size
 - `title`: string (default "") Control title of the plot
-- `cols`: int (default: automatically set) Control number of columns in the gridplot (only relevant of `type=all` is selected)
-- `rows`: int (default: automatically set) Control number of rows in the gridplot (only relevant of `type=all` is selected)
+- `cols`: int (default: automatically set) Control number of columns in the gridplot (only relevant if `type=all` is selected)
+- `rows`: int (default: automatically set) Control number of rows in the gridplot (only relevant if `type=all` is selected)
 - `point_size`: scalar (default 1) Control size of points (switch off by setting to 0)
 
 
@@ -105,6 +106,7 @@ This package depends on the following user-contributed gretl packages:
 * **v0.4 (January 2025)**
 	* Fix URL to github repo in help file
 	* Internal: Get rid of dependency for string_utils package by using gretl's built-in string functions
+	* Improve help text marginally
 
 * **v0.3 (November 2024)**
 	* add new parameter `point_size` for controlling the size of points in the plot
