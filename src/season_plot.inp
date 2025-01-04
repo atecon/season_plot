@@ -323,7 +323,7 @@ function matrix drop_count_column (matrix m)
 
     strings cnames_old = cnameget(m)
     scalar pos = instrings(cnames_old, "count")     # breaks of no 'count' col exists
-    cnames_new = strdrop(cnames_old, "count")       # from "string_utils" package
+    cnames_new = cnames_old - "count"
 
     m = m[,-pos]
     cnameset(m, cnames_new)

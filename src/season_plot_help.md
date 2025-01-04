@@ -102,6 +102,10 @@ This package depends on the following user-contributed gretl packages:
 
 # Changelog
 
+* **v0.4 (January 2025)**
+	* Fix URL to github repo in help file
+	* Internal: Get rid of dependency for string_utils package by using gretl's built-in string functions
+
 * **v0.3 (November 2024)**
 	* add new parameter `point_size` for controlling the size of points in the plot
 	* Internal refactoring and code cleanup
