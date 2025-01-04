@@ -198,10 +198,10 @@ end function
 test_multiplot_settings()
 
 
-function void test_sublot_order (void)
-    print "Start testing sublot_order()"
+function void test_subplot_order (void)
+    print "Start testing subplot_order()"
 
-    strings S = sublot_order()
+    strings S = subplot_order()
 
     assert_equal_num(nelem(S), 6)
     assert_equal_str(S[1], "obsmajor_by_obsminor")
@@ -211,7 +211,7 @@ function void test_sublot_order (void)
     assert_equal_str(S[5], "obsmicro_by_obsmajor")
     assert_equal_str(S[6], "obsmicro_by_obsminor")
 end function
-test_sublot_order()
+test_subplot_order()
 
 
 

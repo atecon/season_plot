@@ -332,10 +332,10 @@ function matrix drop_count_column (matrix m)
 end function
 
 
-function strings sublot_order (void)
+function strings subplot_order (void)
     /* Set the order for subplots. */
 
-    strings sublot_order = defarray(\
+    strings subplot_order = defarray(\
                             "obsmajor_by_obsminor",\
                             "obsmajor_by_obsmicro",\
                             "obsminor_by_obsmajor",\
@@ -343,7 +343,7 @@ function strings sublot_order (void)
                             "obsmicro_by_obsmajor",\
                             "obsmicro_by_obsminor")
 
-    return sublot_order
+    return subplot_order
 end function
 
 
@@ -351,18 +351,18 @@ function void compile_subplots (bundle *self)
     /* Compile all combinations of plots, store these as gp-files and save the file names. */
 
     scalar n_combinations = nelem(getkeys(self.data_to_plot))
-    strings sublot_combs = sublot_order()
+    strings subplot_combs = subplot_order()
     scalar counter = 1
     strings self.gp_filenames = array(0)
 
-    loop foreach i sublot_combs
-        string matname = sprintf("mplot_%s", sublot_combs[i])
+    loop foreach i subplot_combs
+        string matname = sprintf("mplot_%s", subplot_combs[i])
 
         if inbundle(self.data_to_plot, @matname)
             # a matrix with a single row cannot be drawn
             if rows(self.data_to_plot[matname]) > 1
                 # TODO: Later think about writing the ouput to a buffer (string array) instead of a file
-                self.gp_filenames += sprintf("%s/seasplot_%s.gp", $dotdir, sublot_combs[i])
+                self.gp_filenames += sprintf("%s/seasplot_%s.gp", $dotdir, subplot_combs[i])
                 seasplot(matname, self.gp_filenames[counter], self)
                 counter++
             endif
