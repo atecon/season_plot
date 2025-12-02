@@ -1,5 +1,5 @@
 function void season_plot_gui (const series y,
-                               int Frequency[1:4:1] "Freq. to _show on x-axis" {"major (usually year)", "minor (usually Q or M)", "micro (usually day)", "all"},
+                               int Frequency[1:4:1] "Freq. to _show on x-axis" {"major (usually year)", "minor (usually Q, M, W)", "micro (usually day)", "all"},
                                const int plot_width[::900] "Width of plot",
                                const int plot_height[::600] "Height of plot",
                                const int font_size[2::12] "Font size")
