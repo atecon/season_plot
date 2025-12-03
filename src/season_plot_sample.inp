@@ -3,12 +3,10 @@ set verbose off
 
 # pkg install season_plot  # install the package (only once needed)
 # help season_plot         # read the documentation
-
 include season_plot.gfn
 
-
 # Select a data set
-scalar run_example = 1
+scalar run_example = 4
 
 if run_example == 1
     open data9-13.gdt --preserve --quiet  # monthly
@@ -21,6 +19,11 @@ elif run_example == 2
 elif run_example == 3
     open djclose.gdt --preserve --quiet
     series y = djclose       # 5 days business week
+
+elif run_example == 4
+    open bikesharing.gdt --preserve --quiet  # weekly data
+    dataset compact 52 --weekstart=1
+    series y = cnt
 endif
 
 
@@ -31,7 +34,7 @@ do_season_plot(b, "obsmajor")
 # change point_sizes
 scalar b.point_size = 2
 do_season_plot(b, "obsminor")
-if max($pd .= {5,6,7})
+if contains($pd , {5,6,7,52})
     do_season_plot(b, "obsmicro")
 endif
 
