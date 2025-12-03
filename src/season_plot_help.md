@@ -97,6 +97,7 @@ The user can pass the following optional parameters before calling the function 
 
 * **v0.5 (December 2025)**
 	* Add support for weekly data
+	* Internal improvements
 
 * **v0.4 (January 2025)**
 	* Fix URL to github repo in help file
