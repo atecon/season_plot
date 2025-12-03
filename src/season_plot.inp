@@ -198,6 +198,11 @@ function void get_frequency_strings (bundle *self)
                                         "obsmajor", "Year",
                                         "obsminor", "Month",
                                         "obsmicro", "Day")
+    elif $pd == 52
+        bundle self.frequency_strings = defbundle(\
+                                        "obsmajor", "Year",
+                                        "obsminor", "Calendar Week",
+                                        "obsmicro", "Week of Month")
     elif $pd == 12
         bundle self.frequency_strings = defbundle(\
                                         "obsmajor", "Year",
