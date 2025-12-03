@@ -447,7 +447,7 @@ function void flag_frequency_components (const series y,
         self.frequency_components.obsminor = TRUE
     endif
 
-    if maxr($pd .= {5, 6, 7})
+    if maxr($pd .= {5, 6, 7, 52})
         self.frequency_components.obsmicro = TRUE
     endif
 end function
