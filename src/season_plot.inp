@@ -110,7 +110,7 @@ function void plot_all (const bundle self,
     /* Plot all plots on single canvas. */
 
     string plot_opts = get_plot_opts_string(self)
-    strings F = self.gp_filenames
+    strings F = self.gnuplot_buffer
     gridplot F --output="@filename" @plot_opts
 end function
 
@@ -386,8 +386,7 @@ function void compile_subplots (bundle *self)
 end function
 
 
-function void seasplot (const string matname,
-                        const string filename,
+function string seasplot (const string matname,
                         const bundle self)
     /* Execute actual plotting. Create the "gpfile_id"-th figure. */
 
@@ -395,6 +394,7 @@ function void seasplot (const string matname,
     strings cnames = cnameget(m)
     bundle plotops = multiplot_settings()
     scalar point_size = exists(self.point_size) ? self.point_size : plotops.point_size
+    string buffer = empty
 
     plot m
         options fit=none with-lp
@@ -402,7 +402,10 @@ function void seasplot (const string matname,
         printf "set ylabel '%s'", self.name_y
         literal set grid
         printf "set for [i=1:40] linetype i ps %d", point_size
-    end plot --output="@filename"
+        literal set key outside below
+    end plot --outbuf=buffer
+
+    return buffer
 end function
 
 
