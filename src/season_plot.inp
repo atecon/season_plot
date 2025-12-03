@@ -405,12 +405,19 @@ function list get_frequency_series (bundle *self)
     list L = empty
     strings keys = getkeys(self.frequency_components)
 
+    if $pd != 52
     loop foreach i keys
         if self.frequency_components["$i"] == TRUE
             string vname = sprintf("$%s", "$i")
             list L += genseries("$i", @vname)
         endif
     endloop
+    else
+        # Special handling of weekly data
+        L += genseries("obsmajor", $obsmajor)
+        L += genseries("obsminor", isoweek($obsdate)) # calendar week
+        L += genseries("obsmicro", week_of_month())    # week of month
+    endif
 
     return L
 end function
