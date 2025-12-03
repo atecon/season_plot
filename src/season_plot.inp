@@ -191,7 +191,7 @@ end function
 
 
 function void get_frequency_strings (bundle *self)
-    /* Get string abbreviations for each frequency component. */
+    /* Get string abbreviations for each frequency component, including weekly frequency. */
 
     if maxr($pd .= {5, 6, 7})
         bundle self.frequency_strings = defbundle(\
