@@ -193,7 +193,7 @@ end function
 
 
 function void get_frequency_strings (bundle *self)
-    /* Get string abbreviations for each frequency component, including weekly frequency. */
+    /* Get string abbreviations for each frequency component. */
 
     if contains($pd , {5, 6, 7})
         bundle self.frequency_strings = defbundle(\
@@ -203,8 +203,8 @@ function void get_frequency_strings (bundle *self)
     elif $pd == 52
         bundle self.frequency_strings = defbundle(\
                                         "obsmajor", "Year",
-                                        "obsminor", "Calendar Week",
-                                        "obsmicro", "Week of Month")
+                                        "obsminor", "Month")
+                                        #"obsmicro", "Calendar Week")
     elif $pd == 12
         bundle self.frequency_strings = defbundle(\
                                         "obsmajor", "Year",
@@ -419,34 +419,36 @@ function list get_frequency_series (bundle *self)
                 list L += genseries("$i", @vname)
             endif
         endloop
-    else
-        # Special handling of weekly data
-        L += genseries("obsmajor", $obsmajor)
-        L += genseries("obsminor", isoweek($obsdate)) # calendar week
-        L += genseries("obsmicro", week_of_month())    # week of month
-    endif
+
+    #else
+    #    # Special handling of weekly data
+    #    L += genseries("obsmajor", $obsmajor)
+    #    L += genseries("obsminor", $obsminor) # calendar week
+    #    L += genseries("obsmicro", isoweek($obsdate))    # week of month
+    #endif
 
     return L
 end function
 
-function series week_of_month (void)
-    /* Return week of month for each date in date_series.
-    The ISO standard does not define any association of weeks to months. A date
-    is either expressed with a month and day-of-the-month, or with a week and
-    day-of-the-week, never a mix.
-    We simply divide the day-of-the-month by 7 to get the week of the month. */
 
-    series obsdate = $obsdate
-    series day = $obsmicro
-    series wom = NA
+# function series week_of_month (void)
+    # /* Return week of month for each date in date_series.
+    # The ISO standard does not define any association of weeks to months. A date
+    # is either expressed with a month and day-of-the-month, or with a week and
+    # day-of-the-week, never a mix.
+    # We simply divide the day-of-the-month by 7 to get the week of the month. */
 
-    loop i= 1..$nobs
-        scalar wom_value = ceil(day[i] / 7.0)
-        wom[i] = wom_value
-    endloop
+    # series obsdate = $obsdate
+    # series day = $obsmicro
+    # series wom = NA
 
-    return wom
-end function
+    # loop i= 1..$nobs
+        # scalar wom_value = ceil(day[i] / 7.0)
+        # wom[i] = wom_value
+    # endloop
+
+    # return wom
+# end function
 
 function void flag_frequency_components (const series y,
                                         bundle *self)
@@ -461,7 +463,7 @@ function void flag_frequency_components (const series y,
         self.frequency_components.obsminor = TRUE
     endif
 
-    if maxr($pd .= {5, 6, 7, 52})
+    if contains($pd, {5, 6, 7})
         self.frequency_components.obsmicro = TRUE
     endif
 end function
