@@ -363,8 +363,9 @@ function void compile_subplots (bundle *self)
 
     scalar n_combinations = nelem(getkeys(self.data_to_plot))
     strings subplot_combs = subplot_order()
+    strings self.created_subplot_combinations = empty
     scalar counter = 1
-    strings self.gp_filenames = array(0)
+    strings self.gnuplot_buffer = array(0)
 
     loop foreach i subplot_combs
         string matname = sprintf("mplot_%s", subplot_combs[i])
@@ -372,9 +373,8 @@ function void compile_subplots (bundle *self)
         if inbundle(self.data_to_plot, @matname)
             # a matrix with a single row cannot be drawn
             if rows(self.data_to_plot[matname]) > 1
-                # TODO: Later think about writing the ouput to a buffer (string array) instead of a file
-                self.gp_filenames += sprintf("%s/seasplot_%s.gp", $dotdir, subplot_combs[i])
-                seasplot(matname, self.gp_filenames[counter], self)
+                self.gnuplot_buffer += seasplot(matname, self)
+                self.created_subplot_combinations += "$i"
                 counter++
             endif
         endif
