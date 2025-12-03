@@ -415,6 +415,24 @@ function list get_frequency_series (bundle *self)
     return L
 end function
 
+function series week_of_month (void)
+    /* Return week of month for each date in date_series.
+    The ISO standard does not define any association of weeks to months. A date
+    is either expressed with a month and day-of-the-month, or with a week and
+    day-of-the-week, never a mix.
+    We simply divide the day-of-the-month by 7 to get the week of the month. */
+
+    series obsdate = $obsdate
+    series day = $obsmicro
+    series wom = NA
+
+    loop i= 1..$nobs
+        scalar wom_value = ceil(day[i] / 7.0)
+        wom[i] = wom_value
+    endloop
+
+    return wom
+end function
 
 function void flag_frequency_components (const series y,
                                         bundle *self)
