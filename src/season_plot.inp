@@ -136,7 +136,7 @@ end function
 function bundle get_plot_opts_from_self (const bundle self)
     /* Put passed parameters for multiplot() function into a separate bundle. */
 
-    bundle B = _()
+    bundle B = empty
     strings valid_keys = getkeys(multiplot_settings())
 
     loop foreach i valid_keys
