@@ -171,8 +171,8 @@ function void do_pivoting (const series y, bundle *self)
 
     loop foreach i cases
         # Retrieve information
-        string s1 = self.y_grouped_by_frequency["$i"].frequency_1
-        string s2 = self.y_grouped_by_frequency["$i"].frequency_2
+        string s1 = self.y_grouped_by_frequency["$i"].frequency_1  # e.g. obsmajor
+        string s2 = self.y_grouped_by_frequency["$i"].frequency_2  # e.g. obsminor
 
         # loop over two combinations, e.g. major-minor, minor-major
         loop j=1..2
