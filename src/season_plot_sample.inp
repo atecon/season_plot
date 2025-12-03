@@ -6,7 +6,7 @@ set verbose off
 include season_plot.gfn
 
 # Select a data set
-scalar run_example = 4
+scalar run_example = 1
 
 if run_example == 1
     open data9-13.gdt --preserve --quiet  # monthly
@@ -26,15 +26,16 @@ elif run_example == 4
     series y = cnt
 endif
 
-
-# prepare everyting
+# initialize the object
 bundle b = set_season_plot(y)
+
 # Start plotting for difference frequency components
 do_season_plot(b, "obsmajor")
-# change point_sizes
-scalar b.point_size = 2
+
+scalar b.point_size = 1.5  # change point_sizes if wished
 do_season_plot(b, "obsminor")
-if contains($pd , {5,6,7,52})
+
+if contains($pd , {5,6,7})
     do_season_plot(b, "obsmicro")
 endif
 
@@ -42,6 +43,7 @@ if run_example == 1
     # Gridplot with all components and store it
     do_season_plot(b, "all", "season_plot_all.png")
 endif
+
 
 # Optional: Example on how to configure multiplot font size
 # Fine tune plot by controlling parameters
