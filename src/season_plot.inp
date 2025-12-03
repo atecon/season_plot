@@ -26,6 +26,8 @@ function bundle set_season_plot (const series y,
     /*  Compile matrices holding grouped data for plotting, and write the gnuplot-files. */
 
     errorif($pd == 1, "Time-series has no seasonal frequency.")
+    errorif(contains($pd, {4, 5, 6, 7, 12, 52}) == FALSE,
+            sprintf("Data frequency %d is not supported. Supported frequencies are:\nquarterly (4), monthly (12), daily (5,6,7) and weekly (52).", $pd))
 
     smpl y --contiguous
 
@@ -183,7 +185,7 @@ function void do_pivoting (const series y, bundle *self)
             matrix self.data_to_plot.@name = \
                 pivot_by_column_name(
                     self.y_grouped_by_frequency["$i"].matdata,
-                                     first, second, "f(x)", self)
+                    first, second, "f(x)", self)
 
         endloop
     endloop
@@ -411,12 +413,12 @@ function list get_frequency_series (bundle *self)
     strings keys = getkeys(self.frequency_components)
 
     if $pd != 52
-    loop foreach i keys
-        if self.frequency_components["$i"] == TRUE
-            string vname = sprintf("$%s", "$i")
-            list L += genseries("$i", @vname)
-        endif
-    endloop
+        loop foreach i keys
+            if self.frequency_components["$i"] == TRUE
+                string vname = sprintf("$%s", "$i")
+                list L += genseries("$i", @vname)
+            endif
+        endloop
     else
         # Special handling of weekly data
         L += genseries("obsmajor", $obsmajor)
