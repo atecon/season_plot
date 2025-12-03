@@ -1,7 +1,7 @@
 author = Artur Tarassow
 email = atecon@posteo.de
-version = 0.4
-date = 2025-01-04
+version = 0.5
+date = 2025-12-03
 description = Plot seasonal (Buys-Ballot) time-series components
 tags = C22
 min-version = 2024b
