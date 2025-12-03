@@ -95,6 +95,9 @@ The user can pass the following optional parameters before calling the function 
 
 # Changelog
 
+* **v0.5 (December 2025)**
+	* Add support for weekly data
+
 * **v0.4 (January 2025)**
 	* Fix URL to github repo in help file
 	* Internal: Get rid of dependency for string_utils package by using gretl's built-in string functions
