@@ -181,8 +181,10 @@ function void do_pivoting (const series y, bundle *self)
             string name = sprintf("mplot_%s_by_%s", first, second)
 
             matrix self.data_to_plot.@name = \
-                pivot_by_column_name(self.y_grouped_by_frequency["$i"].matdata,
+                pivot_by_column_name(
+                    self.y_grouped_by_frequency["$i"].matdata,
                                      first, second, "f(x)", self)
+
         endloop
     endloop
 end function
